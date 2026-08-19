@@ -99,16 +99,6 @@ a{color:var(--navy-600)}
 .hbtn .lg{display:inline}
 .hbtn .sm{display:none}
 @media (max-width:560px){ .hbtn .lg{display:none} .hbtn .sm{display:inline} }
-.hsearch{position:relative;display:flex;align-items:center}
-.hsearch svg{position:absolute;left:9px;color:#9DB4D4;pointer-events:none}
-.hsearch input{
-  background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);border-radius:8px;
-  padding:7px 10px 7px 30px;font-size:var(--fs-s);font-weight:650;color:#fff;width:190px;
-  transition:background .16s,border-color .16s,width .18s;
-}
-.hsearch input::placeholder{color:#9DB4D4;font-weight:600}
-.hsearch input:focus{outline:none;background:rgba(255,255,255,.16);border-color:var(--accent);width:250px}
-@media (max-width:900px){ .hsearch input{width:130px} .hsearch input:focus{width:180px} }
 
 /* =========================== FILTER BAR =========================== */
 .filterbar{
@@ -452,19 +442,6 @@ figure.chart{margin:0}
   font-weight:800;color:var(--ink-2);cursor:pointer;letter-spacing:.3px;text-transform:uppercase;
 }
 .minibtn:hover{border-color:var(--navy-600);color:var(--navy-700)}
-
-/* =========================== DỰ BÁO CUỐI THÁNG (Tổng quan) =========================== */
-.dbgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:9px}
-.dbchip{
-  border:1px solid var(--hair);border-left:4px solid var(--none);border-radius:10px;padding:9px 11px;
-  cursor:pointer;transition:transform .16s,box-shadow .16s;background:var(--surface);
-}
-.dbchip:hover{transform:translateY(-2px);box-shadow:var(--sh-1)}
-.dbchip.st-good{border-left-color:var(--good)} .dbchip.st-bad{border-left-color:var(--bad)}
-.dbchip .dbi{color:var(--navy-600);margin-right:5px}
-.dbchip .dbn{font-size:9.5px;font-weight:850;letter-spacing:.6px;text-transform:uppercase;color:var(--muted)}
-.dbchip .dbv{display:block;font-size:17px;font-weight:800;letter-spacing:-.4px;color:var(--ink);margin-top:3px}
-.dbchip .dbs{display:block;margin-top:6px}
 
 /* =========================== HỎI ĐÁP =========================== */
 .qabox{display:flex;gap:8px;flex-wrap:wrap}
@@ -1060,11 +1037,6 @@ body.nofilter .filterbar{display:none}
       <span class="ps" id="hPeriodSub">–</span>
     </div>
     <div class="hacts">
-      <div class="hsearch">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.8" cy="10.8" r="7.3"/><path d="m21 21-4.8-4.8"/></svg>
-        <input type="search" id="hSearchIn" list="hSearchList" placeholder="Tìm tỉnh, kho, chỉ tiêu… (Enter)" autocomplete="off" title="Tìm nhanh: gõ tên tỉnh/kho hoặc chỉ tiêu rồi Enter">
-        <datalist id="hSearchList"></datalist>
-      </div>
       <button class="hbtn fbtn" id="bFilter" aria-expanded="true" title="Thu gọn / mở bộ lọc">Bộ lọc</button>
       <span class="saveind off" id="saveInd" title="Sửa tay được lưu tự động vào trình duyệt"><i class="dot"></i><span id="saveTxt">Chưa có sửa tay</span></span>
       <button class="hbtn" id="bRefresh" title="Tải lại toàn bộ dashboard từ kho dữ liệu">Tải lại</button>
@@ -1422,9 +1394,7 @@ const ICONPATH = {
   building:'<rect x="5" y="3" width="14" height="18" rx="1.6"/><path d="M9 7h.01M15 7h.01M9 11h.01M15 11h.01M9 15h.01M15 15h.01M10.5 21v-3h3v3"/>',
   scale:'<path d="M12 3v18M7 6.5h10"/><path d="m5 8-2.5 6a3 3 0 0 0 5 0zM19 8l-2.5 6a3 3 0 0 0 5 0z"/>',
   eye:'<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/>',
-  search:'<circle cx="10.8" cy="10.8" r="7.3"/><path d="m21 21-4.8-4.8"/>',
-  message:'<path d="M4 4.5h16a1 1 0 0 1 1 1V16a1 1 0 0 1-1 1H9l-4.6 3.7A.6.6 0 0 1 3.5 20.2V17.5H4a1 1 0 0 1-1-1V5.5a1 1 0 0 1 1-1z"/><path d="M7.5 9.5h9M7.5 13h6"/>',
-  trenddown:'<path d="m3 7 6 6 4-4 8 8"/><path d="M15 17h6v-6"/>'
+  message:'<path d="M4 4.5h16a1 1 0 0 1 1 1V16a1 1 0 0 1-1 1H9l-4.6 3.7A.6.6 0 0 1 3.5 20.2V17.5H4a1 1 0 0 1-1-1V5.5a1 1 0 0 1 1-1z"/><path d="M7.5 9.5h9M7.5 13h6"/>'
 };
 function ic(name,size=16,cls=""){
   const p=ICONPATH[name]; if(!p) return "";
@@ -3147,47 +3117,6 @@ const QA_SAMPLES=[
   "Đà Nẵng tháng 8 doanh thu bao nhiêu?"
 ];
 
-/* =============================================================================
-   K. CẢNH BÁO TỤT DỐC — 1 KPI của 1 đơn vị KHÔNG ĐẠT liên tiếp ≥2 tháng gần nhất
-   (chỉ tính trong các tháng ĐÃ CÓ số thực đạt, tháng chưa tới bỏ qua). ĐƠN GIÁ
-   không đưa vào đây vì đã cấu hình "luôn ĐẠT" theo yêu cầu khách hàng (rule #9,
-   xem CONFIG.donGia.luonDat trong mkKpi) nên không bao giờ tụt dốc theo đúng nghĩa.
-   ============================================================================= */
-const TUT_DOC_SPAN=3;
-const TUT_DOC_KPIS=[
-  {key:"chatLuong", label:"CHẤT LƯỢNG",
-    get:(code,loai,S2)=>{ const r=unitRow(code,loai,S2); return r.coCl>0?{ok:true,dat:r.datCl===r.coCl}:{ok:false}; }},
-  {key:"sanLuong", label:"SẢN LƯỢNG",
-    get:(code,loai,S2)=>{ const k=calcSanLuongUnit(code,loai,S2); return kpiOK(k)?{ok:true,dat:k.dat}:{ok:false}; }},
-  {key:"chiPhi", label:"CHI PHÍ",
-    get:(code,loai,S2)=>{ const k=calcChiPhiUnit(code,loai,S2); return kpiOK(k)?{ok:true,dat:k.dat}:{ok:false}; }},
-  {key:"doanhThu", label:"DOANH THU",
-    get:(code,loai,S2)=>{ const r=unitRow(code,loai,S2); return kpiOK(r.tongDt)?{ok:true,dat:r.tongDt.dat}:{ok:false}; }}
-];
-function calcTutDoc(S=ST,span){
-  span=span||TUT_DOC_SPAN;
-  const out=[];
-  const units=[...unitsKho(S).map(c=>({code:c,loai:"kho"})), ...unitsNha(S).map(c=>({code:c,loai:"nha"}))];
-  const months=monthsOf(S.nam);
-  for(const u of units){
-    for(const kd of TUT_DOC_KPIS){
-      const withData=[];
-      for(const m of months){
-        const S2=Object.assign({},S,{ky:"Tháng",thang:m,months:[m]});
-        let r; try{ r=kd.get(u.code,u.loai,S2); }catch(_){ r={ok:false}; }
-        if(r.ok) withData.push({m,dat:r.dat});
-      }
-      const last=withData.slice(-span);
-      if(last.length>=2 && last.every(x=>!x.dat)){
-        out.push({code:u.code,loai:u.loai,tinh:tinhOf(u.code),vung:vungOf(u.code),
-          kpiKey:kd.key,kpi:kd.label,soThang:last.length,
-          thangGanNhat:last[last.length-1].m, thangs:last.map(x=>"T"+x.m).join(", ")});
-      }
-    }
-  }
-  return out.sort((a,b)=>b.soThang-a.soThang);
-}
-
 </script>
 <script>
 /* =============================================================================
@@ -3695,51 +3624,7 @@ function renderM0(){
     `Chưa có tháng nào của năm <b>${S.nam}</b> trong kho dữ liệu.`,"calendar");
 
   const ex=calcExec(S);
-  return `<div class="tq1man">${gopBar(S)}${duBaoCuoiThangCard(S)}${execRow(ex)}${tongHopTable(S)}${tutDocCard(S)}</div>`;
-}
-
-/* --- DỰ BÁO CUỐI THÁNG: gộp 5 chỉ tiêu "dự kiến cả tháng" (đã tính ở calcTongQuanRows)
-   thành 1 khu vực dễ nhìn ngay đầu Tổng quan — khách xem 1 giây biết mấy lĩnh vực
-   dự kiến ĐẠT cuối tháng, không phải dò từng dòng của bảng chi tiết bên dưới. */
-function duBaoCuoiThangCard(S){
-  const D=M(S);
-  if(!(D&&isLuyKe(D)&&!isYear(S))) return "";      // chỉ có ý nghĩa ở kỳ LŨY KẾ (tháng chưa hết)
-  const rows=calcTongQuanRows(S).filter(r=>!r.keHoach);
-  const nDat=rows.filter(r=>r.dat).length, nCo=rows.filter(r=>r.status!=="none").length;
-  const chips=rows.map(r=>{
-    const st = r.status==="none" ? "none" : (r.dat?"good":"bad");
-    return `<div class="dbchip st-${st}" data-gotab="${TQ_TAB[r.key]}" tabindex="0" ${tipAttr(r.key==="chatLuong"?tqClTip(r):kpiTip(r.kpi))}>
-      <span class="dbi">${ic(TQ_ICON[r.key],15)}</span>
-      <span class="dbn">${esc(r.label)}</span>
-      <span class="dbv">${esc(r.dText)}</span>
-      <span class="dbs">${badgeOf(st,
-        r.status==="none"?"CHƯA CÓ DỮ LIỆU":(r.dat?"DỰ KIẾN ĐẠT":"DỰ KIẾN KHÔNG ĐẠT"))}</span>
-    </div>`;
-  }).join("");
-  return `<div class="card"><header><span class="ci">${ic("calendar",16)}</span>
-      <div><h3>${lblH("m0.dubao","DỰ BÁO CUỐI THÁNG")}</h3>
-        <span class="sub">Kỳ mới đi ${D.ngayDaQua}/${D.ngayTrongThang} ngày · ${nDat}/${nCo} lĩnh vực <b>dự kiến ĐẠT</b> nếu giữ đúng nhịp hiện tại</span></div>
-      <div class="hr">${infoI("Số DỰ KIẾN = LŨY KẾ CUỐI THÁNG ở bảng tổng hợp phía dưới (suy ra từ nhịp ngày đã qua đối với sản lượng/doanh thu; chi phí/đơn giá/chất lượng là số hiện có, không quy đổi). Bấm vào từng ô để xem chi tiết lĩnh vực đó.")}</div></header>
-    <div class="body"><div class="dbgrid">${chips}</div></div></div>`;
-}
-
-/* --- CẢNH BÁO TỤT DỐC: đơn vị KHÔNG ĐẠT 1 KPI liên tiếp ≥2 tháng gần nhất --- */
-function tutDocCard(S){
-  const list=calcTutDoc(S);
-  if(!list.length) return "";
-  const top=list.slice(0,6);
-  return `<div class="card"><header><span class="ci" style="background:var(--bad-bg);color:var(--bad-tx)">${ic("trenddown",16)}</span>
-      <div><h3>${lblH("m0.tutdoc","CẢNH BÁO TỤT DỐC")}</h3>
-        <span class="sub">${list.length} trường hợp KHÔNG ĐẠT liên tiếp từ 2 tháng trở lên · xem đủ &amp; xử lý ở tab HÀNH ĐỘNG</span></div>
-      <div class="hr"><button class="btn" data-gotab="6">${ic("clipboardcheck",13)}Mở HÀNH ĐỘNG</button></div></header>
-    <div class="body tight"><div class="tblwrap"><table class="dt">
-      <thead><tr><th class="l">TỈNH/KHO</th><th class="l">CHỈ TIÊU</th><th>SỐ THÁNG LIÊN TIẾP</th><th class="l">CÁC THÁNG</th></tr></thead>
-      <tbody>${top.map(x=>`<tr><td class="l"><b>${esc(x.tinh)}</b> <span style="color:var(--muted);font-size:10px">${esc(x.code)} · ${x.loai==="kho"?"BH tại kho":"BH tại nhà"}</span></td>
-        <td class="l">${esc(x.kpi)}</td>
-        <td><span class="badge bad">${ic("flame",10)}${x.soThang} tháng</span></td>
-        <td class="l">${esc(x.thangs)}</td></tr>`).join("")}</tbody></table></div>
-      ${list.length>top.length?`<div class="sub" style="padding:8px 4px 0">+ ${list.length-top.length} trường hợp khác — xem đủ ở tab HÀNH ĐỘNG</div>`:""}
-    </div></div>`;
+  return `<div class="tq1man">${gopBar(S)}${execRow(ex)}${tongHopTable(S)}</div>`;
 }
 
 /* --- BẢNG TỔNG HỢP: 5 lĩnh vực × 5 thông tin (đúng hợp đồng dùng chung với deck) --- */
@@ -4416,33 +4301,8 @@ function renderM5(){
     bItem("Bảo hành tại kho","warehouse",`${cK.dat}/${cK.co}`,"tiêu chí",`Biểu mẫu ${cK.tot} tiêu chí`,true),
     bItem("Số đơn vị","building",f0(unitsNha(S).length+unitsKho(S).length),"tỉnh/kho",esc(scopeLbl(S)))
   ]);
-  return gopBar(S) + banner + chartHieuSuatVung(S) + drillPanel(S) + rankingPanel(S) + fullRankingTable(S)
+  return gopBar(S) + banner + chartHieuSuatVung(S) + drillPanel(S) + rankingPanel(S)
     + matrixSection(S,"nha") + matrixSection(S,"kho");
-}
-/* --- BẢNG XẾP HẠNG THI ĐUA — đủ 14 tỉnh/kho trong phạm vi lọc, xếp theo Điểm hiệu quả --- */
-function fullRankingTable(S){
-  const rows=allUnitRows(S).filter(r=>r.score.val!=null).sort((a,b)=>b.score.val-a.score.val);
-  if(!rows.length) return "";
-  const medal=(rank)=>rank<=3?["medal","#FFD500"]:rank>rows.length-3?["alert","var(--bad-tx)"]:["",""];
-  return `<div class="card"><header><span class="ci" style="background:var(--navy-050);color:var(--navy-700)">${ic("medal",16)}</span>
-      <div><h3>${lblH("m5.rank","BẢNG XẾP HẠNG THI ĐUA")}</h3>
-        <span class="sub">Đủ ${rows.length} đơn vị trong phạm vi lọc · xếp theo Điểm hiệu quả tổng hợp · ${esc(kyLabel(S))}</span></div></header>
-    <div class="body tight"><div class="tblwrap"><table class="dt">
-      <thead><tr><th class="l">HẠNG</th><th class="l">VÙNG</th><th class="l">TỈNH/KHO</th><th>ĐIỂM HIỆU QUẢ</th>
-        <th>CHẤT LƯỢNG</th><th>SẢN LƯỢNG</th><th>ĐƠN GIÁ</th><th>CHI PHÍ</th><th>DOANH THU</th><th>TRẠNG THÁI</th></tr></thead>
-      <tbody>${rows.map((r,i)=>{
-        const rank=i+1, [ic1,col]=medal(rank), co=r.cl.filter(kpiOK);
-        return `<tr><td class="l"><b style="font-size:13px;${col?`color:${col}`:""}">${ic1?ic(ic1,12):""}#${rank}</b></td>
-          <td class="l">${esc(r.vung.replace("Vùng ","V. "))}</td>
-          <td class="l"><b>${esc(r.tinh)}</b> <span style="color:var(--muted);font-size:10px">${esc(r.code)} · ${r.loai==="kho"?"BH tại kho":"BH tại nhà"}</span></td>
-          <td><b style="font-size:13px">${fx(r.score.val,0)}</b><span style="color:var(--muted)">/100</span></td>
-          <td>${co.length?`${co.filter(k=>k.dat).length}/${co.length}`:DASH}</td>
-          <td>${r.sl.actual==null?DASH:f0(r.sl.actual)}</td>
-          <td>${r.dg.actual==null?DASH:vnd(r.dg.actual)}</td>
-          <td>${r.cp.rate==null?DASH:`<span style="color:${r.cp.dat?"var(--good-tx)":"var(--bad-tx)"};font-weight:800">${pc(r.cp.rate)}</span>`}</td>
-          <td>${r.tongDt.actual==null?DASH:tr(r.tongDt.actual)}</td>
-          <td>${badgeOf(r.score.status,r.score.label)}</td></tr>`;
-      }).join("")}</tbody></table></div></div></div>`;
 }
 function drillPanel(S){
   const d=S.drill;
@@ -4600,25 +4460,9 @@ function matrixSection(S,loai){
 /* =============================================================================
    MODULE 7 — HÀNH ĐỘNG (ACTION CENTER)
    ============================================================================= */
-function tutDocPanel(S){
-  const list=calcTutDoc(S);
-  if(!list.length) return "";
-  return `<div class="card"><header><span class="ci" style="background:var(--bad-bg);color:var(--bad-tx)">${ic("trenddown",16)}</span>
-      <div><h3>${lblH("m6.tutdoc","CẢNH BÁO TỤT DỐC NHIỀU THÁNG LIÊN TIẾP")}</h3>
-        <span class="sub">${list.length} trường hợp 1 chỉ tiêu KHÔNG ĐẠT ≥2 tháng gần nhất liên tiếp (trong các tháng đã có số thực đạt)</span></div>
-      <div class="hr">${infoI("Chỉ tính các tháng ĐÃ CÓ số thực đạt trong năm đang xem, tối đa 3 tháng gần nhất. ĐƠN GIÁ TRUNG BÌNH không đưa vào cảnh báo này vì đã cấu hình luôn ĐẠT theo yêu cầu khách hàng.")}</div></header>
-    <div class="body tight"><div class="tblwrap"><table class="dt">
-      <thead><tr><th class="l">VÙNG</th><th class="l">TỈNH/KHO</th><th class="l">CHỈ TIÊU</th><th>SỐ THÁNG LIÊN TIẾP</th><th class="l">CÁC THÁNG</th></tr></thead>
-      <tbody>${list.map(x=>`<tr><td class="l">${esc(x.vung.replace("Vùng ","V. "))}</td>
-        <td class="l"><b>${esc(x.tinh)}</b> <span style="color:var(--muted);font-size:10px">${esc(x.code)} · ${x.loai==="kho"?"BH tại kho":"BH tại nhà"}</span></td>
-        <td class="l">${esc(x.kpi)}</td>
-        <td><span class="badge ${x.soThang>=3?"bad":"warn"}">${ic("flame",10)}${x.soThang} tháng</span></td>
-        <td class="l">${esc(x.thangs)}</td></tr>`).join("")}</tbody></table></div></div></div>`;
-}
 function renderM6(){
   const S=ST, rows=calcActions(S);
   const byStatus=v=>rows.filter(r=>r.tinhTrang===v).length;
-  const tutDoc=tutDocPanel(S);
   const banner=bannerHTML("TRUNG TÂM HÀNH ĐỘNG","clipboardcheck",[
     bItem("Tổng việc","clipboardcheck",f0(rows.length),"dòng",`Tự sinh ${rows.filter(r=>r.auto).length} · thêm tay ${rows.filter(r=>!r.auto).length}`,true),
     bItem("🟢 Hoàn tất","check",f0(byStatus("Hoàn tất")),"",""),
@@ -4629,7 +4473,7 @@ function renderM6(){
   if(!rows.length){
     /* phân biệt "đạt hết" với "kỳ chưa có thực đạt" (tháng kế hoạch T9-T12) */
     const coDl=calcChatLuongTong(S).coDl || allUnitRows(S).some(r=>kpiOK(r.cp)||kpiOK(r.tongDt)||kpiOK(r.sl));
-    return gopBar(S) + banner + tutDoc + `<div class="card"><div class="body">
+    return gopBar(S) + banner + `<div class="card"><div class="body">
     ${coDl
       ? stateHTML("empty","Không có tiêu chí nào chưa đạt",
         "Tất cả KPI có dữ liệu trong phạm vi lọc đều đạt. Bạn vẫn có thể bấm <b>Thêm dòng</b> để ghi việc theo dõi riêng.","check")
@@ -4642,7 +4486,7 @@ function renderM6(){
   const pk="m6", page=ST.page[pk]||0, PS=12, pages=Math.ceil(rows.length/PS)||1;
   const view=rows.slice(page*PS,(page+1)*PS);
   const ed=(id,f,v,ph)=>`<div class="ed" contenteditable="true" data-act="${esc(id)}" data-f="${f}" data-ph="${esc(ph||"")}">${esc(v||"")}</div>`;
-  return gopBar(S) + banner + tutDoc + `<div class="card">
+  return gopBar(S) + banner + `<div class="card">
     <header><span class="ci">${ic("clipboardcheck",16)}</span>
       <div><h3>HÀNH ĐỘNG</h3><span class="sub">Tự sinh từ các tiêu chí KHÔNG ĐẠT · sửa được mọi ô · lưu vào kho dữ liệu</span></div>
       <div class="hr">
@@ -7072,51 +6916,6 @@ document.addEventListener("click",e=>{
 });
 
 /* =============================================================================
-   TÌM KIẾM NHANH (header) — gõ tên tỉnh/kho hoặc từ khoá chỉ tiêu rồi Enter,
-   tự nhảy tới đúng tab / đúng phạm vi lọc tương ứng.
-   ============================================================================= */
-function initSearchList(){
-  const el=$("#hSearchList"); if(!el) return;
-  const opts=[...KHO_ORDER.map(c=>KHOMAP[c].tinh),
-    "Doanh thu","Sản lượng","Đơn hàng","Đơn giá","Chi phí","Chất lượng","Hành động","Tỉnh/Kho","Hỏi đáp"];
-  el.innerHTML=[...new Set(opts)].map(o=>`<option value="${esc(o)}"></option>`).join("");
-}
-const SEARCH_KEYWORDS=[
-  {kw:["chat luong","tieu chi"],                 tab:1, label:"CHẤT LƯỢNG"},
-  {kw:["san luong","don gia","don hang"],        tab:2, label:"SẢN LƯỢNG & ĐƠN GIÁ TB"},
-  {kw:["chi phi"],                                tab:3, label:"CHI PHÍ"},
-  {kw:["doanh thu"],                              tab:4, label:"DOANH THU"},
-  {kw:["xep hang","thi dua","tinh","kho"],        tab:5, label:"TỈNH/KHO"},
-  {kw:["hanh dong","canh bao","tut doc"],         tab:6, label:"HÀNH ĐỘNG"},
-  {kw:["trinh chieu","powerpoint","ppt"],         tab:7, label:"TRÌNH CHIẾU (PPT)"},
-  {kw:["hoi dap","cau hoi"],                      tab:8, label:"HỎI ĐÁP"}
-];
-function runSearch(qtext){
-  const q=String(qtext||"").trim(); if(!q) return;
-  const code=findTinhInQ(q);
-  if(code){
-    ST.vung=vungOf(code); ST.kho=code; ST.tab=5;
-    ST.drill={level:"kho", vung:vungOf(code), kho:code};
-    initFilters(); render(); window.scrollTo({top:0,behavior:"smooth"});
-    toast(`Đã mở ${tinhOf(code)} (${code}) ở tab TỈNH/KHO`);
-    return;
-  }
-  const dq=deaccent(q).toLowerCase();
-  const hit=SEARCH_KEYWORDS.find(x=>x.kw.some(k=>dq.indexOf(k)>=0));
-  if(hit){
-    ST.tab=hit.tab; render(); window.scrollTo({top:0,behavior:"smooth"});
-    toast(`Đã mở tab ${hit.label}`);
-    return;
-  }
-  toast(`Không tìm thấy "${q}" — thử tên tỉnh/kho hoặc từ khoá chỉ tiêu (doanh thu, chi phí, chất lượng…)`);
-}
-document.addEventListener("keydown",e=>{
-  if(e.key!=="Enter") return;
-  if(e.target&&e.target.id==="hSearchIn"){ e.preventDefault(); runSearch(e.target.value); }
-  if(e.target&&e.target.id==="qaIn"){ e.preventDefault(); submitQA(e.target.value); }
-});
-
-/* =============================================================================
    HỎI ĐÁP (tab riêng) — trả lời bằng số thật, tính lại qua calcQAAnswer()
    ============================================================================= */
 function submitQA(qtext){
@@ -7128,10 +6927,13 @@ function submitQA(qtext){
   const el=$("#qaIn"); if(el) el.focus();
   toast(ans.ok?"Đã trả lời — xem bên dưới ô hỏi":"Chưa có dữ liệu phù hợp cho câu hỏi này");
 }
+document.addEventListener("keydown",e=>{
+  if(e.key!=="Enter") return;
+  if(e.target&&e.target.id==="qaIn"){ e.preventDefault(); submitQA(e.target.value); }
+});
 document.addEventListener("click",e=>{
   const qb=e.target.closest("#qaGo"); if(qb){ const el=$("#qaIn"); if(el) submitQA(el.value); return; }
   const qc=e.target.closest("[data-qasample]"); if(qc){ submitQA(qc.dataset.qasample); return; }
-  const sg=e.target.closest("#hSearchGo"); if(sg){ const el=$("#hSearchIn"); if(el) runSearch(el.value); return; }
 });
 /* ô ĐÁNH GIÁ — sửa tại chỗ */
 function editEval(key){
@@ -7867,7 +7669,7 @@ $("#bPpt").addEventListener("click",()=>{ ST.tab=7; render(); exportDeck(); });
   try{
     $("#logoImg").src = LOGO_SRC;
     restored = restoreLocal();                 // nạp lại sửa tay / nhãn đã tự lưu
-    initTabs(); initFilters(); initSearchList(); autoFilterOpen();
+    initTabs(); initFilters(); autoFilterOpen();
     const ms=monthsOf(ST.nam);
     if(ms.length && ms.indexOf(ST.thang)<0) ST.thang=ms[ms.length-1];
     ST.months=[ST.thang];

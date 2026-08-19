@@ -1221,9 +1221,12 @@ const MO=["T1","T2","T3","T4","T5","T6","T7","T8","T9","T10","T11","T12"];
      · CHI PHÍ tháng 8 khách gửi ĐÃ LÀ SỐ CẢ THÁNG (lũy kế cuối tháng) -> KHÔNG quy đổi,
        so thẳng thực chi với định mức cả tháng.
      · CHẤT LƯỢNG và ĐƠN GIÁ là số bình quân -> không bao giờ quy đổi.
+     · GÓI BÁN NĂM 2025 là khoản đã CHỐT XONG (khách xác nhận target đã cập nhật và
+       đạt 100%, không phải mục tiêu chạy dần trong tháng) -> xử lý giống CHI PHÍ:
+       so thẳng thực đạt với target cả tháng, KHÔNG quy đổi theo ngày đã qua.
    Đây là NGUỒN DUY NHẤT của quy tắc: lớp CALC (prRatio/prMeta/prApply/hs) đọc từ đây,
    lớp trình bày và module PPT chỉ mô tả lại, không tự định nghĩa. */
-const PRORATE_NHOM = { sanLuong:true, doanhThu:true, chiPhi:false, donGia:false, chatLuong:false };
+const PRORATE_NHOM = { sanLuong:true, doanhThu:true, chiPhi:false, donGia:false, chatLuong:false, goiBan2025:false };
 const prorateOn    = nhom => !(nhom && PRORATE_NHOM[nhom]===false);
 /* nhãn dùng chung cho mọi câu chữ giải thích quy tắc quy đổi */
 const PR_TEXT = {
@@ -2224,13 +2227,16 @@ function calcChiPhiAll(S=ST){
      BÊN TRONG = Doanh Thu Đơn Hàng Bên Trong + Gói Bán 2025
      BÊN NGOÀI = 1 ĐỔI 1 + BẢO HÀNH MỞ RỘNG + SỬA CHỮA KHÁCH LẺ
    ============================================================================= */
+/* nhóm quy đổi lũy kế theo CATEGORY doanh thu — mọi mục dùng "doanhThu" (có quy đổi
+   theo ngày), riêng "Bán gói năm 2025" đã chốt xong 100% -> "goiBan2025" (không quy đổi). */
+const dtNhomOf = cat => cat==="Bán gói năm 2025" ? "goiBan2025" : "doanhThu";
 function dtCatRaw(D,vg,cat,S){
   const c=((D.doanhThu||{})[vg]||{})[cat];
   if(!c) return {target:null,actual:null,luyKe:null};
   const w=wIdx(S);
   if(w!=null) return {target:NB((c.target_tuan||[])[w]), actual:NB((c.tuan||[])[w]), luyKe:NB((c.tuan||[])[w])};
   const lk=(c.tuan||[]).reduce((s,x)=>s+(x||0),0);
-  const dk=NB(c.dukien)!=null?c.dukien:lk*hs(D);
+  const dk=NB(c.dukien)!=null?c.dukien:lk*hs(D,dtNhomOf(cat));
   return {target:NB(c.target), actual:dk, luyKe:lk};
 }
 const DT_LABEL={
@@ -2269,7 +2275,7 @@ function calcDoanhThuCat(cat,S=ST){
       return mkKpi(Object.assign({},base,{
         target:tg, actual:ac,
         meta:Object.assign({luyKe:ac, soDonVi:parts.length, uocTinh:uoc, nguon:"file dữ liệu tháng"},
-                           prMeta(D, tg, ac)||{})}));
+                           prMeta(D, tg, ac, dtNhomOf(cat))||{})}));
     }
   }
   let t=0,a=0,l=0,n=0,nt=0;
@@ -2331,17 +2337,18 @@ function calcDtUnitCat(code,loai,cat,S=ST){
     : bocGoi ? "Target T1–T7 CHƯA gồm Gói bán 2025 → thực đạt BÊN TRONG cũng không cộng gói"
     : "file dữ liệu tháng";
   if(tgt==null&&act==null) return calcDtUnitCatLegacy(code,loai,cat,S);
+  const nhom=dtNhomOf(cat);   // "Bán gói năm 2025" đã chốt xong 100% -> không quy đổi lũy kế theo ngày
   const ED=edSpec(D,S,code,loai,`dt.${DT_TFIELD[cat]}.target`,
-                  bocGoi?`dt.${DT_TFIELD[cat]}.actDH`:`dt.${DT_TFIELD[cat]}.act`,1e6,prRatio(D));
+                  bocGoi?`dt.${DT_TFIELD[cat]}.actDH`:`dt.${DT_TFIELD[cat]}.act`,1e6,prRatio(D,nhom));
   if(tgt!=null&&act!=null){
     const p=prApply(M(S),tgt,act,{sl:NB(x.slNguon),dgiaTB:NB(x.dgiaNguon),chinhXac:true,
-      goiGop:goiGopHieuLuc, bocGoi, dtDonHang:TRI(x.actDH), nguon:nguonNote});
+      goiGop:goiGopHieuLuc, bocGoi, dtDonHang:TRI(x.actDH), nguon:nguonNote},nhom);
     return mkKpi(Object.assign({},base,p,{ed:ED}));
   }
   const lg=calcDtUnitCatLegacy(code,loai,cat,S);        // bù phần thiếu bằng nguồn cũ
   const p2=prApply(M(S), tgt!=null?tgt:lg.target, act!=null?act:lg.actual,
     Object.assign({},lg.meta||{},{sl:NB(x.slNguon),goiGop:goiGopHieuLuc,bocGoi},
-      act==null?{uocTinh:!!(lg.meta&&lg.meta.uocTinh),buNguonCu:true}:{chinhXac:true,nguon:nguonNote}));
+      act==null?{uocTinh:!!(lg.meta&&lg.meta.uocTinh),buNguonCu:true}:{chinhXac:true,nguon:nguonNote}),nhom);
   return mkKpi(Object.assign({},base,p2,{ed:ED}));
 }
 function calcDtUnitCatLegacy(code,loai,cat,S=ST){

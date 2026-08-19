@@ -5173,7 +5173,8 @@ function xoBuild(o){
   if(o.cols) ws["!cols"]=o.cols;
   /* Đóng băng 5 dòng tiêu đề + các cột định danh, và ghi nhận dòng TỔNG để bước
      trang trí (chạy trên gói .xlsx đã ghi xong) tô nền và kẻ viền cho đúng dòng. */
-  XO_DECO[o.sheet||o.title]={ dong:XO_HANG_DL-1, cot:o.ncotKhoa, tong:dongTong, ncol:o.ncol };
+  XO_DECO[o.sheet||o.title]={ dong:XO_HANG_DL-1, cot:o.ncotKhoa, tong:dongTong, ncol:o.ncol,
+    tieu:[1], phu:[2], hdr:[4,5] };
   return ws;
 }
 /* dòng đầu tiên của vùng dữ liệu trên MỌI sheet dữ liệu (1-5 là tiêu đề) */
@@ -5465,12 +5466,15 @@ function xoSheet7(nam,months){
 const XO_TG_MON=[8,9,10,11,12];
 function xoSheetTarget(nam){
   const A=[], mg=[];
+  const tgLab=[], tgHdr=[], tgTong=[];      // dòng nhãn khối · dòng dải/tiêu đề cột · dòng TỔNG — để trang trí
   const push=r=>{ A.push(r); return A.length; };                 // trả về số dòng 1-based
   const hdr=()=>{ const h=[null,xoS("TRƯỞNG PHÒNG"),xoS("MIỀN"),xoS("TỈNH"),xoS("5 THÁNG CUỐI NĂM")];
     XO_TG_MON.forEach(m=>h.push(xoS("T"+m))); h.push(null);
     XO_TG_MON.forEach(m=>h.push(xoS("T"+m))); h.push(null);
     XO_TG_MON.forEach(m=>h.push(xoS("T"+m))); h.push(null);
-    XO_TG_MON.forEach(m=>h.push(xoS("T"+m))); return h; };
+    XO_TG_MON.forEach(m=>h.push(xoS("T"+m)));
+    /* thay ô trống bằng ô rỗng-nhưng-có-thật để dải màu tiêu đề liền mạch, không đứt quãng */
+    return h.map(v=>v===null?xoTrong():v); };
   const units=XO_U_ALL();
   /* doanh thu kế hoạch của 1 đơn vị theo nhóm (đồng) — đọc thẳng DB.targetDT */
   const tgDt=(m,u,cat)=>{ const T=(DB.targetDT||{})[kyKey(nam,m)]; if(!T) return null;
@@ -5484,13 +5488,15 @@ function xoSheetTarget(nam){
 
   /* --- 1 khối: dòng nhãn (nếu có) + dòng tiêu đề + dòng TỔNG + 14 dòng đơn vị --- */
   function block(o){
-    if(o.label){ const rl=push([null,xoS(o.label)]); mg.push({s:{r:rl-1,c:1},e:{r:rl-1,c:5}}); }
-    if(o.band){ const rb=push([null,xoS(o.band),null,null,null,xoS("DOANH THU"),null,null,null,null,null,
+    if(o.label){ const rl=push([null,xoS(o.label)]); mg.push({s:{r:rl-1,c:1},e:{r:rl-1,c:5}}); tgLab.push(rl); }
+    if(o.band){ const bh=[null,xoS(o.band),null,null,null,xoS("DOANH THU"),null,null,null,null,null,
                                xoS("ĐƠN GIÁ"),null,null,null,null,null,xoS("SỐ LƯỢNG"),null,null,null,null,null,
-                               xoS("CHI PHÍ")]);
-                 mg.push({s:{r:rb-1,c:1},e:{r:rb-1,c:3}}); }
-    push(hdr());
+                               xoS("CHI PHÍ")].map(v=>v===null?xoTrong():v);
+                 const rb=push(bh);
+                 mg.push({s:{r:rb-1,c:1},e:{r:rb-1,c:3}}); tgHdr.push(rb); }
+    tgHdr.push(push(hdr()));
     const rt=push([]);                                   // giữ chỗ dòng TỔNG, điền sau
+    tgTong.push(rt);
     const r0=A.length+1;
     units.forEach(u=>{
       const rn=A.length+1;
@@ -5520,7 +5526,8 @@ function xoSheetTarget(nam){
   const dgTyLe=(rn,i)=>xoF(`IFERROR(${xoC(i-6)}${rn}/${xoC(i+6)}${rn},"")`,Z_GIA);
 
   push([]);                                                        // dòng 1 để trống như nguồn
-  const r2=push([null,xoS(`DOANH THU 5 THÁNG CUỐI NĂM ${nam} DV BẢO HÀNH SỬA CHỮA CE`)]);
+  const r2=push([null,xoS(`DOANH THU 5 THÁNG CUỐI NĂM ${nam} DV BẢO HÀNH SỬA CHỮA CE`),
+                 xoTrong(),xoTrong(),xoTrong(),xoTrong()]);        // ô rỗng-nhưng-có-thật để dải màu liền mạch B→F
   mg.push({s:{r:r2-1,c:1},e:{r:r2-1,c:5}});
 
   block({ label:"A. DOANH THU BÊN TRONG", band:"I - TARGET",
@@ -5563,6 +5570,7 @@ function xoSheetTarget(nam){
     .concat([...Array(5)].map(()=>({wch:12}))).concat([{wch:5}])
     .concat([...Array(5)].map(()=>({wch:10}))).concat([{wch:5}])
     .concat([...Array(5)].map(()=>({wch:17})));
+  XO_DECO[XO_TEN.tg]={ dong:0, cot:0, tong:tgTong, ncol:28, tieu:[r2], hdr:tgHdr, nhan:tgLab };
   return ws;
 }
 
@@ -5571,9 +5579,10 @@ function xoSheetTarget(nam){
    ========================================================================== */
 function xoSheetHD(nam,months){
   const L=(a,b)=>[xoS(a),xoS(b)];
+  const trong8=()=>[...Array(8)].map(()=>xoTrong());   // dòng 2 (nằm trong vùng merge tiêu đề) cần có ô thật để tô nền
   const A=[
     L(`KHO DỮ LIỆU BHSC CE — TOÀN BỘ SỐ LIỆU THÁNG ${months[0]}-${months[months.length-1]} / ${nam}`,null),
-    [],[],
+    trong8(),[],
     L("MỤC ĐÍCH","File này là bản kết xuất TOÀN BỘ kho dữ liệu của trang báo cáo, dựng đúng theo cấu trúc"),
     L(null,"file nguồn DATA_UP_WEB_v2 (9 sheet). Dùng để đối chiếu số liệu, chỉnh sửa và nhập ngược trở lại."),
     [],
@@ -5605,9 +5614,12 @@ function xoSheetHD(nam,months){
     L(null,"(tổng bên trong · bên trong · gói bán 2025 · tổng bên ngoài · 1 đổi 1 · bảo hành mở rộng · khách lẻ)."),
     L(null,"Cột 5 THÁNG CUỐI NĂM và các dòng TỔNG đều là công thức.")
   ];
+  /* nhãn mục ở cột A (MỤC ĐÍCH, SỐ GỐC, PHẠM VI…) — mọi dòng có chữ ở cột A, trừ dòng tiêu đề 1-2 */
+  const nhan=[]; A.forEach((r,i)=>{ if(i>=2 && r && r[0]) nhan.push(i+1); });
   const ws=XLSX.utils.aoa_to_sheet(A);
   ws["!merges"]=[{s:{r:0,c:0},e:{r:1,c:7}}];
   ws["!cols"]=[{wch:18},{wch:112},{wch:9}];
+  XO_DECO[XO_TEN.hd]={ dong:2, cot:0, tong:[], ncol:8, tieu:[1,2], nhan, nhanCot:{A:1} };
   return ws;
 }
 
@@ -5622,6 +5634,10 @@ function xoSheetHD(nam,months){
    nên số liệu và công thức giữ nguyên tuyệt đối.
    ============================================================================= */
 const XO_TONG_NEN="FFF3CC", XO_TONG_VIEN="FFBF8F00";   // nền vàng nhạt · viền vàng đậm
+/* bảng màu bổ sung cho lớp "làm đẹp" — chỉ ảnh hưởng NHÌN, không đụng số liệu/công thức */
+const XO_HDR_NEN="FF4472C4";                 // nền xanh dương — dòng tiêu đề cột (h4/h5, dải nhóm)
+const XO_TITLE_NEN="FF1F3864";               // nền xanh than đậm — dòng tiêu đề sheet
+const XO_SUB_NEN="FFF2F2F2", XO_SUB_CHU="FF595959";   // nền xám nhạt + chữ xám — dòng phụ đề
 
 /* CRC-32 (bảng chuẩn) — bắt buộc phải có để ghi lại mục trong gói ZIP */
 const xoCrc32=(function(){
@@ -5706,22 +5722,84 @@ function xoThemStyle(muc){
        .replace(new RegExp("</"+the+">"), noiDung+"</"+the+">");
     return c;
   };
-  const fontId  = chen("fonts",'<font><b/><sz val="12"/><color theme="1"/><name val="Calibri"/><family val="2"/><scheme val="minor"/></font>',1);
-  const fillId  = chen("fills",'<fill><patternFill patternType="solid"><fgColor rgb="FF'+XO_TONG_NEN+'"/><bgColor indexed="64"/></patternFill></fill>',1);
-  const borderId= chen("borders",'<border><left/><right/><top style="thick"><color rgb="'+XO_TONG_VIEN+'"/></top><bottom/><diagonal/></border>',1);
+  /* --- TỔNG: nền vàng nhạt, chữ đậm, viền trên vàng đậm (giữ nguyên như bản gốc) --- */
+  const fTong = chen("fonts",'<font><b/><sz val="12"/><color theme="1"/><name val="Calibri"/><family val="2"/><scheme val="minor"/></font>',1);
+  const flTong= chen("fills",'<fill><patternFill patternType="solid"><fgColor rgb="FF'+XO_TONG_NEN+'"/><bgColor indexed="64"/></patternFill></fill>',1);
+  const bTong = chen("borders",'<border><left/><right/><top style="thick"><color rgb="'+XO_TONG_VIEN+'"/></top><bottom/><diagonal/></border>',1);
+  /* --- HEADER: dòng tiêu đề cột (h4/h5, dải nhóm) — nền xanh dương, chữ trắng đậm, viền mảnh trắng --- */
+  const fHdr = chen("fonts",'<font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/><family val="2"/><scheme val="minor"/></font>',1);
+  const flHdr= chen("fills",'<fill><patternFill patternType="solid"><fgColor rgb="'+XO_HDR_NEN+'"/><bgColor indexed="64"/></patternFill></fill>',1);
+  const bHdr = chen("borders",'<border><left style="thin"><color rgb="FFFFFFFF"/></left><right style="thin"><color rgb="FFFFFFFF"/></right><top style="thin"><color rgb="FFFFFFFF"/></top><bottom style="thin"><color rgb="FFFFFFFF"/></bottom><diagonal/></border>',1);
+  /* --- TITLE: dòng tiêu đề sheet (dòng 1) — nền xanh than đậm, chữ trắng đậm.
+     Cỡ 12 (không lớn hơn): dòng tiêu đề ở 7 sheet dữ liệu chỉ cao 1 dòng mặc định,
+     cỡ chữ lớn hơn dễ bị cắt mất khi mở bằng trình đọc không tự giãn chiều cao dòng. --- */
+  const fTit  = chen("fonts",'<font><b/><sz val="12"/><color rgb="FFFFFFFF"/><name val="Calibri"/><family val="2"/><scheme val="minor"/></font>',1);
+  const flTit = chen("fills",'<fill><patternFill patternType="solid"><fgColor rgb="'+XO_TITLE_NEN+'"/><bgColor indexed="64"/></patternFill></fill>',1);
+  /* --- SUB: dòng phụ đề (dòng 2) — chữ xám nghiêng, nền xám nhạt --- */
+  const fSub  = chen("fonts",'<font><i/><sz val="10"/><color rgb="'+XO_SUB_CHU+'"/><name val="Calibri"/><family val="2"/><scheme val="minor"/></font>',1);
+  const flSub = chen("fills",'<fill><patternFill patternType="solid"><fgColor rgb="'+XO_SUB_NEN+'"/><bgColor indexed="64"/></patternFill></fill>',1);
+  /* --- LABEL: nhãn mục (sheet HƯỚNG DẪN, dòng khối sheet TARGET) — chữ xanh than đậm, viền dưới mảnh --- */
+  const fLab  = chen("fonts",'<font><b/><sz val="11"/><color rgb="'+XO_TITLE_NEN+'"/><name val="Calibri"/><family val="2"/><scheme val="minor"/></font>',1);
+  const bLab  = chen("borders",'<border><left/><right/><top/><bottom style="thin"><color rgb="'+XO_HDR_NEN+'"/></bottom><diagonal/></border>',1);
+
   const m=/<cellXfs\b[^>]*>([\s\S]*?)<\/cellXfs>/.exec(x); if(!m) return 0;
   const xfs=m[1].match(/<xf\b[^>]*\/>/g)||[];
   const N=xfs.length;
-  const bien=xfs.map(t=>t
-    .replace(/fontId="\d+"/,'fontId="'+fontId+'"')
-    .replace(/fillId="\d+"/,'fillId="'+fillId+'"')
-    .replace(/borderId="\d+"/,'borderId="'+borderId+'"')
-    .replace(/\s*\/>$/,' applyFont="1" applyFill="1" applyBorder="1"/>'));
-  x=x.replace(m[0],'<cellXfs count="'+(N*2)+'">'+xfs.join("")+bien.join("")+"</cellXfs>");
+  const bien=(fontId,fillId,borderId)=>xfs.map(t=>{
+    let s=t;
+    if(fontId  !=null) s=s.replace(/fontId="\d+"/,  'fontId="'  +fontId  +'"');
+    if(fillId  !=null) s=s.replace(/fillId="\d+"/,  'fillId="'  +fillId  +'"');
+    if(borderId!=null) s=s.replace(/borderId="\d+"/,'borderId="'+borderId+'"');
+    return s.replace(/\s*\/>$/,' applyFont="1" applyFill="1" applyBorder="1"/>');
+  });
+  /* thứ tự cố định: TỔNG(+N) · HEADER(+2N) · TITLE(+3N) · SUB(+4N) · LABEL(+5N) */
+  const khoi=[xfs.join(""),
+    bien(fTong,flTong,bTong).join(""),
+    bien(fHdr, flHdr, bHdr ).join(""),
+    bien(fTit, flTit, null ).join(""),
+    bien(fSub, flSub, null ).join(""),
+    bien(fLab, null,  bLab ).join("")];
+  x=x.replace(m[0],'<cellXfs count="'+(N*6)+'">'+khoi.join("")+"</cellXfs>");
   e.data=xoBin(x);
   return N;
 }
-/* --- áp khung nhìn + style dòng TỔNG cho 1 sheet --- */
+/* --- áp lại style cho 1 nhóm dòng (danh sách số dòng 1-based) bằng cách dịch chỉ số
+   style hiện có của mỗi ô thêm "offset" — dùng chung cho TỔNG/HEADER/TITLE/SUB/LABEL.
+   cotLoc (tuỳ chọn) = {A:1,B:1,...} giới hạn chỉ tô những cột đó trong dòng, ô khác
+   giữ nguyên style gốc — dùng cho nhãn cột A của sheet HƯỚNG DẪN, tránh tô luôn cả
+   câu mô tả dài ở cột B cùng dòng. --- */
+function xoApHang(x,rows,offset,cotLoc){
+  if(!rows||!rows.length) return x;
+  const bo={}; rows.forEach(r=>bo[r]=1);
+  return x.replace(/<row([^>]*)>([\s\S]*?)<\/row>/g,(all,attr,noi)=>{
+    const rn=/\br="(\d+)"/.exec(attr);
+    if(!rn||!bo[+rn[1]]) return all;
+    const moi=noi.replace(/<c\s+([^>]*?)\s*(\/)?>/g,(mm,at,tu)=>{
+      if(cotLoc){
+        const cm=/r="([A-Z]+)\d+"/.exec(at);
+        if(!cm||!cotLoc[cm[1]]) return mm;
+      }
+      at = /\bs="\d+"/.test(at) ? at.replace(/\bs="(\d+)"/,(y,k)=>'s="'+(+k+offset)+'"') : at+' s="'+offset+'"';
+      return "<c "+at+(tu||"")+">";
+    });
+    return "<row"+attr+">"+moi+"</row>";
+  });
+}
+/* --- đặt chiều cao dòng tường minh (ht + customHeight) cho danh sách dòng đã cho —
+   phòng trường hợp trình đọc không tự giãn chiều cao dòng theo cỡ chữ đậm/lớn hơn
+   mặc định, khiến dòng tiêu đề/tiêu đề cột bị cắt mất chữ. --- */
+function xoDatCao(x,rows,pt){
+  if(!rows||!rows.length) return x;
+  const bo={}; rows.forEach(r=>bo[r]=1);
+  return x.replace(/<row r="(\d+)"([^>]*)>/g,(all,rn,attr)=>{
+    if(!bo[+rn]) return all;
+    let a=attr;
+    a = /\bht="[\d.]+"/.test(a) ? a.replace(/\bht="[\d.]+"/,'ht="'+pt+'"') : a+' ht="'+pt+'"';
+    a = /\bcustomHeight="1"/.test(a) ? a : a+' customHeight="1"';
+    return '<row r="'+rn+'"'+a+'>';
+  });
+}
+/* --- áp khung nhìn + style các nhóm dòng (TỔNG/tiêu đề/phụ đề/nhãn) cho 1 sheet --- */
 function xoTrangTriSheet(e,deco,N){
   let x=xoTxt(e.data);
   if(deco.dong||deco.cot){
@@ -5730,18 +5808,15 @@ function xoTrangTriSheet(e,deco,N){
       '<sheetView$1><pane xSplit="'+deco.cot+'" ySplit="'+deco.dong+'" topLeftCell="'+oTrai
       +'" activePane="bottomRight" state="frozen"/><selection pane="bottomRight"/></sheetView>');
   }
-  const tong={}; (deco.tong||[]).forEach(r=>tong[r]=1);
-  if(N>0 && (deco.tong||[]).length){
-    x=x.replace(/<row([^>]*)>([\s\S]*?)<\/row>/g,(all,attr,noi)=>{
-      const rn=/\br="(\d+)"/.exec(attr);
-      if(!rn||!tong[+rn[1]]) return all;
-      const moi=noi.replace(/<c\s+([^>]*?)\s*(\/)?>/g,(mm,at,tu)=>{
-        at = /\bs="\d+"/.test(at) ? at.replace(/\bs="(\d+)"/,(y,k)=>'s="'+(+k+N)+'"') : at+' s="'+N+'"';
-        return "<c "+at+(tu||"")+">";
-      });
-      return "<row"+attr+">"+moi+"</row>";
-    });
+  if(N>0){
+    x=xoApHang(x,deco.tong,N);      // TỔNG        -> +N
+    x=xoApHang(x,deco.hdr, 2*N);    // tiêu đề cột -> +2N
+    x=xoApHang(x,deco.tieu,3*N);    // tiêu đề sheet -> +3N
+    x=xoApHang(x,deco.phu, 4*N);    // phụ đề      -> +4N
+    x=xoApHang(x,deco.nhan,5*N,deco.nhanCot);   // nhãn mục -> +5N (nhanCot: chỉ cột chỉ định nếu có)
   }
+  x=xoDatCao(x,deco.tieu,20);   // dòng tiêu đề sheet cần cao hơn dòng thường để chữ đậm không bị cắt
+  x=xoDatCao(x,deco.hdr,16);    // dòng tiêu đề cột — cao hơn một chút cho thoáng
   e.data=xoBin(x);
 }
 /* --- điều phối: nhận gói .xlsx thô, trả gói đã trang trí --- */

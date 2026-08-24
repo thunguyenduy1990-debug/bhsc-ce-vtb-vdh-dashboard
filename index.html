@@ -51,7 +51,14 @@
          "Helvetica Neue",Arial,"Noto Sans",sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%}
+/* min-height (không phải height cố định) — nếu để height:100% cứng, body bị ép
+   đúng bằng chiều cao màn hình, khiến các thanh position:sticky (appbar/filterbar/
+   tabbar là con trực tiếp của body) tính "khối chứa" theo chiều cao ĐÓ thay vì theo
+   chiều cao THẬT của toàn trang (dài hơn nhiều khi có bảng/biểu đồ dài) — hậu quả:
+   khi cuộn sâu, các thanh này bị trình duyệt tự nhả dính giữa chừng dù chưa cuộn
+   hết nội dung. min-height chỉ đảm bảo trang không NGẮN hơn màn hình, vẫn tự giãn
+   theo nội dung dài, nên sticky tính đúng phạm vi toàn trang. */
+html,body{min-height:100%}
 body{
   font-family:var(--font);font-size:var(--fs-b);line-height:1.45;color:var(--ink);
   background:var(--plane);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
@@ -7038,19 +7045,24 @@ function syncStickyOffsets(){
   });
   root.setProperty("--stick-3", offset+"px");   // banner TỔNG QUAN dính ngay dưới thanh cuối cùng còn dính
 
-  /* Đệm cuối module chứa banner — position:sticky chỉ dính được trong phạm vi
-     chiều cao của khối cha (section.module). Khi cuộn tới sát cuối trang, phần
-     "đất" còn lại phía dưới có thể NHỎ HƠN chiều cao banner, khiến trình duyệt
-     tự nhả banner ra khỏi vị trí dính (tụt xuống/biến mất) dù chưa cuộn hết nội
-     dung thật sự — đây là hành vi mặc định của CSS sticky, không phải lỗi, nhưng
-     không đúng ý "luôn hiển thị cố định dù kéo tới cuối trang". Khắc phục bằng
-     cách chừa thêm khoảng trống (padding-bottom) đúng bằng chiều cao banner ở
-     cuối module đang hiển thị, để banner luôn còn đủ chỗ mà dính cho tới khi
-     cuộn hết nội dung thật + phần đệm vô hình này (không ảnh hưởng module khác). */
+  /* Đệm cuối module — position:sticky chỉ dính được trong phạm vi chiều cao của
+     khối cha (section.module). Cả CỤM dính (appbar + filterbar + tabbar + banner
+     nếu có) đều dùng chung "khối cha" là toàn bộ trang; thanh nào nằm CÀNG THẤP
+     trong cụm (top offset càng lớn) thì càng cần nhiều "đất" phía dưới mới giữ
+     được vị trí dính tới cuối — nếu không đủ, trình duyệt sẽ tự nhả từng thanh ra
+     SỚM DẦN theo thứ tự offset tăng dần (filterbar rồi tabbar rồi appbar…) ngay
+     giữa trang dài, dù chưa cuộn hết nội dung thật — đây là hành vi mặc định của
+     CSS sticky, không phải lỗi, nhưng không đúng ý "cả cụm đứng yên, không tách
+     rời nhau". Khắc phục bằng cách chừa thêm khoảng trống (padding-bottom) ở
+     cuối module đang hiển thị, đúng bằng tổng chiều cao cụm dính (offset — tức
+     appbar+filterbar+tabbar — cộng thêm banner nếu tab này có) + một chút dư, để
+     thanh nằm thấp nhất trong cụm vẫn còn đủ chỗ mà dính cho tới khi cuộn hết nội
+     dung thật + phần đệm vô hình này (không ảnh hưởng module khác). */
   const modActive=[...document.querySelectorAll("section.module")].find(el=>!el.hidden);
   if(modActive){
     const b=modActive.querySelector(".banner");
-    modActive.style.paddingBottom = b ? (b.getBoundingClientRect().height+16)+"px" : "";
+    const need=offset+(b?b.getBoundingClientRect().height:0)+24;
+    modActive.style.paddingBottom=need+"px";
   }
 }
 

@@ -42,6 +42,11 @@
   --fs-h1:19px; --fs-h2:13px; --fs-h3:12px; --fs-b:12.5px; --fs-s:11.5px; --fs-xs:10.5px;
   --sp:14px;
   --hdr-h:60px;
+  /* ngưỡng dính (top) của filterbar/tabbar/banner TỔNG QUAN — giá trị mặc định dưới đây
+     chỉ là dự phòng cho lần vẽ đầu tiên; JS (syncStickyOffsets, 07-app.js) đo chiều cao
+     THẬT của .appbar/.filterbar/.tabbar sau mỗi lần render() và ghi đè chính xác, vì các
+     thanh này có thể xuống dòng (nhiều bộ lọc/tháng) khiến chiều cao thay đổi theo màn hình. */
+  --stick-1:60px; --stick-2:103px; --stick-3:145px;
   --font:"Inter","Roboto",-apple-system,BlinkMacSystemFont,"Segoe UI","SF Pro Text",
          "Helvetica Neue",Arial,"Noto Sans",sans-serif;
 }
@@ -102,7 +107,7 @@ a{color:var(--navy-600)}
 
 /* =========================== FILTER BAR =========================== */
 .filterbar{
-  position:sticky;top:var(--hdr-h);z-index:55;background:var(--surface);border-bottom:1px solid var(--hair);
+  position:sticky;top:var(--stick-1);z-index:55;background:var(--surface);border-bottom:1px solid var(--hair);
   padding:9px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:var(--sh-1);
 }
 .fgrp{display:flex;align-items:center;gap:7px}
@@ -134,7 +139,7 @@ a{color:var(--navy-600)}
 
 /* =========================== TABS =========================== */
 .tabbar{
-  position:sticky;top:calc(var(--hdr-h) + 43px);z-index:50;background:var(--surface);
+  position:sticky;top:var(--stick-2);z-index:50;background:var(--surface);
   border-bottom:1px solid var(--hair);padding:0 20px;display:flex;gap:2px;overflow-x:auto;
   scrollbar-width:none;
 }
@@ -369,10 +374,16 @@ table.mini .kico .i{color:var(--navy-500);display:flex;flex:none}
   color:#BBCCE6}
 
 /* =========================== BANNER =========================== */
+/* Dính lại (sticky) ngay dưới appbar/filterbar/tabbar khi cuộn xuống, ở MỌI kích thước
+   màn hình — top lấy từ --stick-3 do syncStickyOffsets() (07-app.js) tính theo chiều cao
+   THẬT của các thanh phía trên còn đang dính (tự động = 0 nếu appbar/filterbar/tabbar đã
+   chuyển sang tĩnh ở màn hẹp, xem media query bên dưới). Thêm bóng đổ phía dưới để tách
+   rõ khỏi nội dung đang cuộn qua bên dưới. */
 .banner{
   background:linear-gradient(115deg,var(--navy-800) 0%,var(--navy-700) 55%,var(--navy-600) 100%);
   color:#fff;border-radius:var(--r-lg);padding:14px 18px;display:flex;align-items:center;gap:20px;
-  flex-wrap:wrap;box-shadow:var(--sh-2);position:relative;overflow:hidden;
+  flex-wrap:wrap;box-shadow:var(--sh-2),0 10px 16px -8px rgba(10,20,35,.35);position:sticky;
+  top:var(--stick-3);z-index:45;overflow:hidden;
 }
 .banner::after{content:"";position:absolute;right:-40px;top:-60px;width:220px;height:220px;border-radius:50%;
   background:radial-gradient(circle,rgba(255,213,0,.14),transparent 68%)}
@@ -6963,6 +6974,7 @@ function renderMonthPicker(){
 function setFilterOpen(on){
   document.body.classList.toggle("nofilter",!on);
   const b=$("#bFilter"); if(b){ b.setAttribute("aria-expanded",String(on)); b.classList.toggle("acc",!on); }
+  syncStickyOffsets();   // thu/mở bộ lọc đổi chiều cao filterbar -> tính lại ngưỡng dính tabbar/banner
 }
 $("#bFilter").addEventListener("click",()=>setFilterOpen(document.body.classList.contains("nofilter")));
 function autoFilterOpen(){ setFilterOpen(innerWidth>820); }
@@ -7005,6 +7017,43 @@ $("#fSort").addEventListener("change",e=>{ST.sort=e.target.value;render()});
 $("#fLoai").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
   ST.loai=b.dataset.v; initFilters(); render()});
 
+/* =============================================================================
+   NGƯỠNG DÍNH (STICKY) — đo chiều cao THẬT của appbar/filterbar/tabbar sau mỗi
+   lần render() rồi ghi vào biến CSS --stick-1/--stick-2/--stick-3 (dùng làm
+   "top" cho filterbar/tabbar/banner TỔNG QUAN). Cần đo động vì filterbar có thể
+   xuống 1-2-3 dòng tuỳ số bộ lọc/tháng đang bật và bề rộng màn hình, nên một
+   con số cố định sẽ lệch (banner/tabbar dính sai chỗ, đè lên nhau).
+   Chỉ CỘNG DỒN chiều cao của thanh nào ĐANG THỰC SỰ dính (position:sticky) —
+   ở màn hẹp (xem media query .appbar/.filterbar/.tabbar) các thanh này tự
+   chuyển sang tĩnh (position:static) để đỡ chiếm màn hình, khi đó banner sẽ tự
+   dính sát lên trên (top:0) hoặc ngay dưới appbar, không cần code riêng cho
+   từng khổ máy. */
+function syncStickyOffsets(){
+  const root=document.documentElement.style;
+  let offset=0;
+  [[".appbar",null],[".filterbar","--stick-1"],[".tabbar","--stick-2"]].forEach(([sel,vout])=>{
+    if(vout) root.setProperty(vout, offset+"px");
+    const el=$(sel);
+    if(el && getComputedStyle(el).position==="sticky") offset+=el.getBoundingClientRect().height;
+  });
+  root.setProperty("--stick-3", offset+"px");   // banner TỔNG QUAN dính ngay dưới thanh cuối cùng còn dính
+
+  /* Đệm cuối module chứa banner — position:sticky chỉ dính được trong phạm vi
+     chiều cao của khối cha (section.module). Khi cuộn tới sát cuối trang, phần
+     "đất" còn lại phía dưới có thể NHỎ HƠN chiều cao banner, khiến trình duyệt
+     tự nhả banner ra khỏi vị trí dính (tụt xuống/biến mất) dù chưa cuộn hết nội
+     dung thật sự — đây là hành vi mặc định của CSS sticky, không phải lỗi, nhưng
+     không đúng ý "luôn hiển thị cố định dù kéo tới cuối trang". Khắc phục bằng
+     cách chừa thêm khoảng trống (padding-bottom) đúng bằng chiều cao banner ở
+     cuối module đang hiển thị, để banner luôn còn đủ chỗ mà dính cho tới khi
+     cuộn hết nội dung thật + phần đệm vô hình này (không ảnh hưởng module khác). */
+  const modActive=[...document.querySelectorAll("section.module")].find(el=>!el.hidden);
+  if(modActive){
+    const b=modActive.querySelector(".banner");
+    modActive.style.paddingBottom = b ? (b.getBoundingClientRect().height+16)+"px" : "";
+  }
+}
+
 /* ---------- render orchestration ---------- */
 const RENDERERS=[renderM0,renderM1,renderM2,renderM3,renderM4,renderM5,renderM6,renderM7,renderM8];
 let renderSeq=0;
@@ -7043,6 +7092,7 @@ function render(){
        Nếu vẫn lỗi, gửi lại file dữ liệu để kiểm tra.`,"alert");
   }
   host.classList.remove("stale");
+  syncStickyOffsets();
   requestAnimationFrame(animate);
 }
 function animate(){

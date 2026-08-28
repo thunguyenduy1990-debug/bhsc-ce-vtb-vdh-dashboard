@@ -1104,6 +1104,17 @@ table.vttbl td.rk{font-weight:900;color:#0B2E63}
   .vtlist{padding-left:10px}
 }
 
+/* khi IN (Xuất PDF): ẩn nút bấm, mở hết danh sách cho gọn trang */
+@media print{
+  .vtbar-r{display:none!important}
+  .vtbar{background:#0B2E63!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .vtexp{display:none!important}
+  .vtrow{cursor:default}
+  table.vttbl th{position:static}
+  .vtcard{break-inside:avoid}
+  table.vtinner{break-inside:auto}
+}
+
 </style>
 </head>
 <body>
@@ -5453,6 +5464,51 @@ function slideModel(S){
     NOTE(`Ưu tiên: CHẤT LƯỢNG → PHÁT TRIỂN NGOÀI → CHI PHÍ • Tuần kế tiếp: ${dmy(vp.days[0])} – ${dmy(vp.days[4])} • `
       + (vp.rows.filter(r=>r.ly).map(r=>`${r.noi} (${r.ly})`).join(" → ")
          || "Không còn tỉnh chưa đạt trong phạm vi đang xem — lịch tuần dành cho kiểm soát & duy trì."))]});
+  /* ---------- 13 · VƯỢT TRỘI ---------- */
+  if (typeof VT !== "undefined" && VT) {
+    const vms = selMonths(S).filter(m => (VT.meta.thang || []).indexOf(m) >= 0);
+    const vkho = Object.values(VT.kho).filter(k => {
+      const base = String(k.ma).replace(/_TK$/, "");
+      if (S.vung !== "TONG" && vungOf(base) !== S.vung) return false;
+      if (S.kho !== "ALL" && base !== S.kho) return false;
+      return k.nhom === "kho" ? showKho(S) : showNha(S);
+    });
+    if (vkho.length) {
+      const maSet = {}; vkho.forEach(k => maSet[k.ma] = 1);
+      const vng = VT.nguoi.filter(p => maSet[p.kho] && (p.nhom === "kho" ? showKho(S) : showNha(S)));
+      const vDat = vng.filter(p => p.vt).length;
+      const pc = n => vng.length ? Math.round(n / vng.length * 1000) / 10 + "%" : "0%";
+      const vhead = ["KHO / ĐƠN VỊ", "NHÓM", "SỐ NV"].concat(vms.map(m => "T" + m)).concat(["LŨY KẾ", "TỶ LỆ"]);
+      const vrows = vkho.map(k => [k.tinh, k.nhom === "kho" ? "Tại kho" : "Tại nhà", String(k.n)]
+        .concat(vms.map(m => { const d = k.thang[String(m)]; return d ? d.vt + "/" + d.n : "–"; }))
+        .concat([String(k.lk.vt), k.n ? Math.round(k.lk.vt / k.n * 1000) / 10 + "%" : "–"]));
+      const sumM = vms.map(m => {
+        const a = vkho.reduce((x, k) => x + ((k.thang[String(m)] || {}).vt || 0), 0);
+        const b = vkho.reduce((x, k) => x + ((k.thang[String(m)] || {}).n || 0), 0);
+        return a + "/" + b; });
+      vrows.push({ sum: true, cells: ["TỔNG", "", String(vng.length)].concat(sumM)
+        .concat([String(vDat), pc(vDat)]) });
+      const nCol = vhead.length;
+      const wFix = [2.5, 1.0, 0.8], wLast = [1.0, 0.95];
+      const wMon = (12.8 - wFix.reduce((a, b) => a + b, 0) - wLast.reduce((a, b) => a + b, 0)) / Math.max(1, vms.length);
+      SL.push({ id: "vuottroi", n: SL.length + 1,
+        title: "ĐÁNH GIÁ VƯỢT TRỘI — KẾT QUẢ THEO KHO", sub, blocks: [
+        { kind: "five", title: "TỔNG QUAN VƯỢT TRỘI", items: [
+          { l: "ĐẠT VƯỢT TRỘI", v: vDat + "/" + vng.length },
+          { l: "TỶ LỆ ĐẠT", v: pc(vDat) },
+          { l: "BẢO HÀNH TẠI NHÀ", v: String(vng.filter(p => p.nhom === "nha").length) },
+          { l: "BẢO HÀNH TẠI KHO", v: String(vng.filter(p => p.nhom === "kho").length) },
+          { l: "BẢO LƯU KỲ 6 THÁNG", v: String(vng.filter(p => p.chot6t).length) },
+          { l: "SỐ KHO", v: String(vkho.length) }
+        ]},
+        T(vhead, vrows, { w: wFix.concat(vms.map(() => wMon)).concat(wLast), lalign: true }),
+        NOTE("Ô hiển thị SỐ NGƯỜI ĐẠT / SỐ NGƯỜI CÓ DỮ LIỆU trong tháng. "
+          + "NV bảo hành tại nhà: đủ 6/6 điểm 3 tiêu chí và nằm trong quota 30% của kho. "
+          + "NV bảo hành tại kho: xét TOP 30% thu nhập. "
+          + "Người đã đạt Vượt Trội kỳ 6 tháng đầu năm được giữ nguyên danh hiệu.")]});
+    }
+  }
+
   return SL;
 }
 

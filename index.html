@@ -7036,8 +7036,7 @@ function xoNapV2(kq,nam){
 }
 
 </script>
-<script>
-/* __TAB10_VUOT_TROI__ */
+<script>/* __TAB10_VUOT_TROI__ */
 /* =============================================================================
    MODULE 9 — VƯỢT TRỘI  (tab 10)
    Nguồn: vuottroi.json — sinh cùng lúc với app Vượt Trội nên 2 nơi LUÔN khớp số.
@@ -7048,33 +7047,9 @@ function xoNapV2(kq,nam){
 let VT = null, VT_ERR = null;
 const VT_OPEN = {};                         /* kho nào đang mở danh sách */
 
-/* ── NẠP DỮ LIỆU: fetch TRƯỚC, bản nhúng làm DỰ PHÒNG ────────────────────────
-   · Qua http (GitHub Pages): fetch chạy được -> LUÔN lấy vuottroi.json mới nhất
-     trong repo, nên skill cap-nhat-app-vuot-troi vẫn có thể đẩy RIÊNG file
-     vuottroi.json mà không cần build lại index.html (giữ nguyên quy trình cũ).
-   · Mở file HTML tự chứa bằng file:// : trình duyệt CHẶN mọi fetch (CORS), trước
-     đây tab 10 báo "Không tải được dữ liệu Vượt Trội" -> nay rơi về VT_EMBED
-     (bản chụp build2.js nhúng sẵn) nên vẫn xem được offline.
-   VT_EMBED có thể không tồn tại (bản index.html do add_tab10.py chèn thẳng) —
-   dùng typeof để không vỡ.                                                    */
-const VT_FALLBACK = (typeof VT_EMBED !== 'undefined' && VT_EMBED) ? VT_EMBED : null;
-/* Mở bằng file:// thì fetch CHẮC CHẮN bị chặn -> dùng thẳng bản nhúng, KHÔNG gọi
-   fetch để khỏi ném lỗi CORS đỏ ra console (làm roundtrip.js/xlscheck.js báo lỗi oan). */
-if (location.protocol === 'file:' && VT_FALLBACK) {
-  VT = VT_FALLBACK;
-  setTimeout(() => { if (ST.tab === 9) render(); }, 0);
-} else {
-fetch('vuottroi.json?v=' + Date.now()).then(r => {
-  if (!r.ok) throw new Error('HTTP ' + r.status);
-  return r.json();
-}).then(j => {
-  VT = j; VT_ERR = null; if (ST.tab === 9) render();
-}).catch(e => {
-  if (VT_FALLBACK) { VT = VT_FALLBACK; VT_ERR = null; }   /* offline: dùng bản nhúng */
-  else VT_ERR = e.message;
-  if (ST.tab === 9) render();
-});
-}
+fetch('vuottroi.json?v=' + Date.now()).then(r => r.json()).then(j => {
+  VT = j; if (ST.tab === 9) render();
+}).catch(e => { VT_ERR = e.message; if (ST.tab === 9) render(); });
 
 const vtMonths = (S = ST) => selMonths(S).filter(m => (VT.meta.thang || []).indexOf(m) >= 0);
 const vtNhomOK = (nhom, S = ST) => nhom === 'kho' ? showKho(S) : showNha(S);

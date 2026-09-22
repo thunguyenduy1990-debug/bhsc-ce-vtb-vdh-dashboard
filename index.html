@@ -7230,7 +7230,8 @@ function vtNote(S) {
   const t = [];
   if (['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4'].indexOf(S.ky) >= 0)
     t.push('Vượt Trội chỉ chấm theo <b>THÁNG</b> — đang hiển thị kết quả cả tháng của kỳ đang chọn.');
-  t.push(`Tháng 8 chốt data tới <b>${esc(VT.meta.chotT8)}</b>.`);
+  // Nhãn tháng chốt: lấy tháng CUỐI trong meta.thang (trước ghi cứng "Tháng 8" → sai khi sang T9).
+  t.push(`Tháng ${Math.max(...(VT.meta.thang || [0]))} chốt data tới <b>${esc(VT.meta.chotT8)}</b>.`);
   return `<div class="lblbar">${ic('info', 14)} ${t.join(' ')}</div>`;
 }
 

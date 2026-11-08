@@ -1040,48 +1040,6 @@ body.nofilter .filterbar{display:none}
 .printonly{display:none}
 </style>
 <style>/* __TAB10_VUOT_TROI__ */
-/* ============== TAB 11 · TARGET VƯỢT TRỘI (doanh thu) ============== */
-.vtdbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
-  background:var(--surface);border:1px solid var(--hair);border-radius:12px;padding:8px 12px;margin-bottom:var(--sp,12px)}
-.vtdbar-l{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-2)}
-.vtdnote{font-size:10.5px;color:var(--warn-tx);background:var(--warn-bg);border-radius:6px;padding:2px 7px}
-.vtdbar-r{display:flex;gap:6px;flex-wrap:wrap}
-.vtdk{border:1px solid var(--hair-2);background:var(--raised);color:var(--navy-600);font-weight:800;font-size:11.5px;
-  padding:6px 12px;border-radius:8px;cursor:pointer}
-.vtdk:hover{border-color:var(--navy-500)}
-.vtdk.on{background:var(--navy-700);border-color:var(--navy-700);color:#fff}
-.vtdk.nod{opacity:.55}
-.vtdcards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:var(--sp,12px)}
-@media (max-width:1100px){.vtdcards{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media (max-width:640px){.vtdcards{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.vtdcard{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;gap:3px;
-  background:var(--surface);border:1px solid var(--hair);border-left:5px solid var(--hair-2);border-radius:12px;padding:10px 12px}
-.vtdcard:hover{box-shadow:var(--sh-1);border-color:var(--navy-500)}
-.vtdcard.sel{outline:2px solid var(--navy-500);outline-offset:1px}
-.vtdcard.m-vt{border-left-color:#0B6B3A}.vtdcard.m-bs{border-left-color:var(--good)}
-.vtdcard.m-no{border-left-color:var(--bad)}.vtdcard.m-none{border-left-color:var(--hair-2)}
-.vtdcard .vh{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--navy-700);letter-spacing:.2px}
-.vtdcard .vs{font-size:10px;color:var(--muted)}
-.vtdcard .vv{font-size:24px;font-weight:900;color:var(--ink);line-height:1.15;margin-top:2px}
-.vtdcard .vv small{font-size:10.5px;font-weight:700;color:var(--muted)}
-.vtdcard .vm{height:6px;background:var(--sunken);border-radius:9px;overflow:hidden}
-.vtdcard .vm i{display:block;height:100%;background:var(--hair-2)}
-.vtdcard.m-vt .vm i{background:#0B6B3A}.vtdcard.m-bs .vm i{background:var(--good)}.vtdcard.m-no .vm i{background:var(--bad)}
-.vtdcard .vf{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:10.5px;color:var(--muted);font-weight:700;margin-top:3px}
-.vtdcard .vn{font-size:10.5px;color:var(--ink-2)}
-.vtdb{display:inline-flex;align-items:center;gap:4px;font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:99px;white-space:nowrap}
-.vtdb.vt{background:#0B6B3A;color:#fff}.vtdb.bs{background:var(--good-bg);color:var(--good-tx)}
-.vtdb.no{background:var(--bad-bg);color:var(--bad-tx)}.vtdb.none{background:var(--none-bg);color:var(--none-tx)}
-table.vtdtbl td,table.vtdmx td{text-align:center}
-table.vtdtbl .vtdvt{background:#FFFBEF}
-table.vtdtbl th.vtdvt{background:#FFF3CC;color:#7A5200}
-.vtddk{display:block;font-style:normal;font-size:9.5px;color:var(--muted);font-weight:600}
-td.r-vt{background:#DDF1E5}td.r-vt b{color:#0B6B3A}
-td.r-bs,td.r-ok{background:var(--good-bg)}td.r-bs b{color:var(--good-tx)}
-td.r-no{background:var(--bad-bg)}td.r-no b{color:var(--bad-tx)}
-td.vtdna{color:var(--muted-2)}
-.vtdok{color:#0B6B3A;font-weight:800}
-.vtdleg{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:8px 15px 10px;font-size:10.5px;color:var(--muted)}
 /* ===================== TAB 10 · VƯỢT TRỘI ===================== */
 .vtbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
   background:linear-gradient(90deg,var(--navy-700,#0B2E63),var(--navy-600,#1257B8));
@@ -7539,201 +7497,125 @@ const vtXuatData = () => vtTaiFile('DATA-NGUON-VUOT-TROI.xlsx',
 </script>
 <script>
 /* =============================================================================
-   MODULE 10 — TARGET VƯỢT TRỘI DOANH THU  (tab 11)          — dựng 08/11/2026
-   Khác hẳn tab 10 (VƯỢT TRỘI nhân viên). Đo DOANH THU từng tỉnh/kho so với 2 mức:
-     · TARGET BASE  = target doanh thu đang chấm trên web (sheet TARGET, khối A/B)
-     · TARGET VƯỢT TRỘI (VT) = khối C sheet TARGET: DB.targetDT[kỳ][mã](.kho).vt
-   4 nhóm: Bên trong · 1 Đổi 1 · Bảo hành mở rộng · Khách lẻ (SCDV) + TỔNG (1+2+3+4).
-   3 mức đánh giá: ĐẠT VƯỢT TRỘI (≥ VT) · ĐẠT BASE (≥ base, < VT) · CHƯA ĐẠT BASE.
-
-   CÁCH CHẤM (thống nhất cho 1 tháng và cộng dồn nhiều tháng, vd Q4):
-     tỷ lệ = THỰC ĐẠT cộng dồn ÷ TARGET "tới hiện tại"
-     target tới hiện tại = Σ target tháng × phần tháng đã qua
-       (tháng đã chốt = 1 · tháng đang chạy = ngày đã qua/ngày trong tháng · tháng chưa có số = 0)
-   => 1 tháng đang chạy: đúng bằng DỰ KIẾN CẢ THÁNG ÷ TARGET như các tab khác.
-   Chỉ hiện trên web + Excel (khối C sheet TARGET); KHÔNG đưa vào PPT.
+   MODULE 10 — TARGET VƯỢT TRỘI DOANH THU  (tab 11)        — làm lại 08/11/2026
+   Theo yêu cầu anh Thu: GIỐNG TAB 5 DOANH THU (chỉ phần bảng), cột KPI thay bằng
+   TARGET VƯỢT TRỘI (khối C sheet TARGET -> DB.targetDT[kỳ][mã](.kho).vt).
+   Thực đạt, quy đổi lũy kế, chấm ĐẠT/KHÔNG ĐẠT y hệt tab 5 — chỉ khác target.
+   4 nhóm có VT: Bên trong (nhà + kho) · 1 Đổi 1 · BHMR · Khách lẻ (SCDV).
+   Gói bán 2025 và 5 dịch vụ mới KHÔNG có VT nên không có trong tab này.
+   Nhiều tháng: chỉ cộng các tháng CÓ target VT (target + thực đạt cùng các tháng đó).
+   Khác hẳn tab 10 (VƯỢT TRỘI nhân viên). Không đưa vào PPT.
    ============================================================================= */
-const VTD_NHOM=[
-  {k:"trong", ten:"BÊN TRONG",        sub:"BH tại nhà & tại kho", icon:"layers",  cat:l=>l==="kho"?"Bảo hành tại kho":"Bảo hành tại nhà", kho:true},
-  {k:"doi1",  ten:"1 ĐỔI 1",          sub:"bảo hành 1 đổi 1",     icon:"refresh", cat:()=>"BH 1 đổi 1", kho:false},
-  {k:"bhmr",  ten:"BẢO HÀNH MỞ RỘNG", sub:"BHMR",                 icon:"shield",  cat:()=>"BHMR",       kho:false},
-  {k:"sckl",  ten:"KHÁCH LẺ (SCDV)",  sub:"sửa chữa khách lẻ",    icon:"wrench",  cat:()=>"SCDV",       kho:true}
-];
-const VTD_TONG={k:"tong", ten:"TỔNG VƯỢT TRỘI", sub:"1 + 2 + 3 + 4", icon:"trophy"};
-let VTD_SEL="tong";                                   // nhóm đang xem ở bảng chi tiết
-
-const vtdT=(nam,m)=>(DB.targetDT||{})[kyKey(nam,m)];
-function vtdCoVT(nam,m){ const T=vtdT(nam,m); if(!T) return false;
-  return Object.values(T).some(u=>u&&((u.vt&&Object.keys(u.vt).length)||(u.kho&&u.kho.vt))); }
-function vtdThangVT(nam){ return [...Array(12)].map((_,i)=>i+1).filter(m=>vtdCoVT(nam,m)); }
-/* tháng đã có số thực đạt doanh thu (tháng chưa có số -> không tính vào nhịp) */
-/* ngưỡng 1 triệu đồng tổng toàn vùng: bỏ qua số lẻ rác do công thức của file nguồn (vd 0,07đ) */
-function vtdCoSo(nam,m){ const D=DB.ky[kyKey(nam,m)]; if(!D||!D.tinh) return false;
-  let s=0; Object.values(D.tinh).forEach(r=>{ for(const u of [r,r&&r.kho]){ const x=u&&u.dt&&u.dt.trong;
-    if(x&&NB(x.act)>0) s+=x.act; } }); return s>=1e6; }
-function vtdVT(nam,m,code,loai,k){ const T=vtdT(nam,m); let u=T&&T[code]; if(u&&loai==="kho") u=u.kho;
-  return u&&u.vt?TRI(u.vt[k]):null; }
-/* đơn vị trong phạm vi lọc cho 1 nhóm */
-function vtdUnits(n,S){
-  const out=[];
-  if(showNha(S)) unitsNha(S).forEach(c=>out.push([c,"nha"]));
-  if(showKho(S)&&(n.k==="tong"||n.kho)) unitsKho(S).forEach(c=>out.push([c,"kho"]));
-  return out;
-}
-/* 1 đơn vị × 1 nhóm × các tháng đang xem */
-function vtdO(){ return {A:0,nA:0,BF:0,VF:0,BN:0,VN:0,nB:0,nV:0,dk:null}; }
-function vtdCell(code,loai,n,months,S){
-  const o=vtdO();
-  if(n.k==="tong"){ VTD_NHOM.filter(g=>loai!=="kho"||g.kho).forEach(g=>vtdCong(o,vtdCell(code,loai,g,months,S))); return vtdXong(o,months,S); }
-  if(loai==="kho"&&!n.kho) return null;                                  // kho không có 1Đ1 / BHMR
-  for(const m of months){
-    const S1=Object.assign({},S,{ky:"Tháng",thang:m,months:[m]});
-    const k=calcDtUnitCat(code,loai,n.cat(loai),S1);
-    const vt=vtdVT(S.nam,m,code,loai,n.k), co=vtdCoSo(S.nam,m);
-    const e=co?((k.meta&&k.meta.prorate)||1):0;
-    if(co&&k.actual!=null){ o.A+=k.actual; o.nA++; }
-    if(k.target!=null){ o.BF+=k.target; o.BN+=k.target*e; o.nB++; }
-    if(vt!=null){ o.VF+=vt; o.VN+=vt*e; o.nV++; }
+const VTD_ICON={"Bảo hành tại nhà":"home","Bảo hành tại kho":"warehouse","BH 1 đổi 1":"refresh","BHMR":"shield","SCDV":"wrench"};
+function vtdVT(nam,m,code,loai,fld){ const T=(DB.targetDT||{})[kyKey(nam,m)]; let u=T&&T[code]; if(u&&loai==="kho") u=u.kho;
+  return u&&u.vt?TRI(u.vt[fld]):null; }
+function vtdThangVT(nam){ return [...Array(12)].map((_,i)=>i+1).filter(m=>{ const T=(DB.targetDT||{})[kyKey(nam,m)];
+  return !!T&&Object.values(T).some(u=>u&&(u.vt||(u.kho&&u.kho.vt))); }); }
+/* 1 đơn vị × 1 nhóm doanh thu — cùng thực đạt với tab 5, target = VT */
+function calcVtdUnitCat(code,loai,cat,S=ST){
+  const base={key:"vt:"+cat,name:DT_LABEL[cat]||cat,icon:VTD_ICON[cat]||"banknote",fmt:tr,unit:"tr đ"};
+  if(isYear(S)){
+    let t=0,a=0,n=0,nM=0,nNA=0;
+    eachMonth(S,(Dm,S2)=>{ const k=calcVtdUnitCat(code,loai,cat,S2);
+      if(k.naLabel==="không áp dụng"){nNA++;return;}
+      if(k.target==null) return;                                   // tháng không có VT: bỏ cả thực đạt
+      nM++; t+=k.target; if(k.actual!=null){a+=k.actual;n++;} });
+    if(nNA&&!nM) return mkKpi(Object.assign({},base,{target:null,actual:null,naLabel:"không áp dụng",
+      dataReason:"Nghiệp vụ này không phát sinh ở đơn vị đang xem"}));
+    if(!nM) return mkKpi(Object.assign({},base,{target:null,actual:null,naLabel:"chưa có target vượt trội",
+      dataReason:"Các tháng đang chọn chưa có Target Vượt Trội"}));
+    return mkKpi(Object.assign({},base,{target:t,actual:n?a:null,meta:{congDon:true,soThangVT:nM}}));
   }
-  return vtdXong(o,months,S);
+  const b=calcDtUnitCat(code,loai,cat,S);
+  if(b.naLabel==="không áp dụng") return mkKpi(Object.assign({},base,{target:null,actual:null,naLabel:"không áp dụng",dataReason:b.reason}));
+  const vt=vtdVT(S.nam,S.thang,code,loai,DT_TFIELD[cat]);
+  if(vt==null) return mkKpi(Object.assign({},base,{target:null,actual:b.actual,naLabel:"chưa có target vượt trội",
+    dataReason:"Sheet TARGET chưa có Target Vượt Trội cho kỳ này"}));
+  const p=prApply(M(S),vt,b.actual,Object.assign({},b.meta||{},{vuotTroi:true,targetBase:b.target,
+    nguon:"Khối C. TARGET VƯỢT TRỘI của sheet TARGET"}),dtNhomOf(cat),DT_TFIELD[cat]);
+  return mkKpi(Object.assign({},base,p));
 }
-function vtdCong(o,x){ if(!x) return; if(x.A!=null){o.A+=x.A;o.nA++;} if(x.BF!=null){o.BF+=x.BF;o.BN+=x.BN;o.nB++;}
-  if(x.VF!=null){o.VF+=x.VF;o.VN+=x.VN;o.nV++;} }
-function vtdXong(o,months,S){
-  const A=o.nA?o.A:null, BF=o.nB?o.BF:null, VF=o.nV?o.VF:null;
-  const r={A, BF, VF, BN:o.BN, VN:o.VN,
-    rB:(A!=null&&o.BN>0)?A/o.BN:null, rV:(A!=null&&o.VN>0)?A/o.VN:null,
-    pB:(A!=null&&BF)?A/BF:null,       pV:(A!=null&&VF)?A/VF:null,
-    thieu:(A!=null&&VF!=null)?Math.max(0,VF-A):null};
-  /* 1 tháng đang chạy: dự kiến cả tháng (để hiện cạnh thực đạt) */
-  if(months.length===1&&A!=null&&o.VN>0&&VF&&o.VN<VF-1e-9) r.dk=A/(o.VN/VF);
-  else if(months.length===1&&A!=null&&o.BN>0&&BF&&o.BN<BF-1e-9) r.dk=A/(o.BN/BF);
-  r.muc = A==null ? "none" : (r.rV!=null&&r.rV>=1) ? "vt" : (r.rB!=null&&r.rB>=1) ? "bs" : "no";
-  return r;
+function calcVtdCat(cat,S=ST){
+  const k=sumKpi(dtUnitsOf(cat,S).map(([c,l])=>calcVtdUnitCat(c,l,cat,S)),DT_LABEL[cat]||cat,VTD_ICON[cat]);
+  k.key="vt:"+cat; return k;
 }
-const VTD_MUC={vt:{t:"ĐẠT VƯỢT TRỘI",i:"trophy"}, bs:{t:"ĐẠT BASE",i:"check"}, no:{t:"CHƯA ĐẠT BASE",i:"x"}, none:{t:"CHƯA CÓ SỐ",i:"minus"}};
-function vtdBadge(x){ const m=VTD_MUC[x?x.muc:"none"]; return `<span class="vtdb ${x?x.muc:"none"}">${ic(m.i,10)}${m.t}</span>`; }
-const vtdPc=v=>v==null?DASH:pc1(v);
-function vtdTip(x,n,lbl){
-  if(!x||x.A==null) return "";
-  return tipAttr(`<div class="tt">${ic(n.icon||"trophy",12)}${esc(n.ten)} · ${esc(lbl)}</div>
-    <dl><dt>Thực đạt</dt><dd>${tr(x.A)}</dd>${x.dk!=null?`<dt>Dự kiến cả tháng</dt><dd>${tr(x.dk)}</dd>`:""}
-    <dt>Target base</dt><dd>${tr(x.BF)}</dd><dt>Target vượt trội</dt><dd>${tr(x.VF)}</dd>
-    ${(x.BN&&x.BF&&x.BN<x.BF-1e-6)?`<dt>Base tới hiện tại</dt><dd>${tr(x.BN)}</dd><dt>VT tới hiện tại</dt><dd>${tr(x.VN)}</dd>`:""}
-    <dt>% so base</dt><dd>${vtdPc(x.rB)}</dd><dt>% so vượt trội</dt><dd>${vtdPc(x.rV)}</dd>
-    <dt>Còn thiếu tới VT</dt><dd>${x.thieu==null?"–":x.thieu<=0?"đã chạm":tr(x.thieu)}</dd></dl>`);
-}
+const VTD_NGOAI=["BH 1 đổi 1","BHMR","SCDV"];
+const calcVtdBenTrong=S=>sumKpi([calcVtdCat("Bảo hành tại nhà",S),calcVtdCat("Bảo hành tại kho",S)],"BÊN TRONG","layers");
+const calcVtdBenNgoai=S=>sumKpi(VTD_NGOAI.map(c=>calcVtdCat(c,S)),"BÊN NGOÀI","trendup");
+const calcVtdTong=S=>sumKpi([calcVtdBenTrong(S),calcVtdBenNgoai(S)],"DOANH THU (4 NHÓM)","trendup");
 
 function renderM10(){
-  const S=ST, nam=S.nam, coVT=vtdThangVT(nam);
-  if(!coVT.length) return emptyCard("Chưa có Target Vượt Trội",
-    `Năm ${nam} chưa có khối <b>C. TARGET VƯỢT TRỘI</b> trong sheet TARGET của file dữ liệu.`);
-  /* tháng đang xem = các tháng đã chọn có VT; nếu bộ lọc chung đang ở tháng khác
-     thì tự hiện THÁNG GẦN NHẤT có số (không đổi bộ lọc chung) và nói rõ.         */
-  let ms=(S.ky==="Năm"?coVT:selMonths(S)).filter(m=>coVT.indexOf(m)>=0), tuChon=false;
-  if(!ms.length){ const cs=coVT.filter(m=>vtdCoSo(nam,m)); ms=[cs.length?cs[cs.length-1]:coVT[0]]; tuChon=true; }
-  const SS=Object.assign({},S,{ky:"Tháng",thang:ms[ms.length-1],months:ms});
-  const quy=ms.length>1;
-  const lblKy = quy ? `Cộng dồn ${monthsLabel(ms)}/${nam}` : (()=>{ const D=DB.ky[kyKey(nam,ms[0])];
-      return D&&isLuyKe(D)?`Lũy kế T${ms[0]}/${nam} (${D.ngayDaQua}/${D.ngayTrongThang} ngày)`:`Cả tháng ${ms[0]}/${nam}`; })();
-  const nhoms=[VTD_TONG].concat(VTD_NHOM);
-  const tongOf=n=>{ const o=vtdO(); vtdUnits(n,SS).forEach(([c,l])=>vtdCong(o,vtdCell(c,l,n,ms,SS))); return vtdXong(o,ms,SS); };
-  const T=nhoms.map(n=>({n,x:tongOf(n)}));
-  const tg=T[0].x;
-  if(!nhoms.some(n=>n.k===VTD_SEL)) VTD_SEL="tong";
+  const S=ST, coVT=vtdThangVT(S.nam);
+  const chon=(S.ky==="Năm")?monthsOf(S.nam):selMonths(S);
+  const thangVT=chon.filter(m=>coVT.indexOf(m)>=0);
+  if(!thangVT.length) return gopBar(S)+`<div class="card"><div class="body">${stateHTML("empty","Kỳ đang chọn chưa có Target Vượt Trội",
+    coVT.length?`Target Vượt Trội chỉ có ở <b>${esc(monthsLabel(coVT))}/${S.nam}</b>. Anh chọn tháng ${coVT.join(", ")} hoặc nút <b>Quý</b> ở bộ lọc tháng phía trên để xem.`
+              :`Năm ${S.nam} chưa có khối <b>C. TARGET VƯỢT TRỘI</b> trong sheet TARGET.`,"medal")}</div></div>`;
+  const bt=calcVtdBenTrong(S), bn=calcVtdBenNgoai(S), tg=calcVtdTong(S);
+  const banner=bannerHTML("TARGET VƯỢT TRỘI","medal",[
+    bKpi("DOANH THU (4 NHÓM)",tg,"trendup",true), bKpi("BÊN TRONG",bt,"layers"), bKpi("BÊN NGOÀI",bn,"trendup")]);
+  const thieu=chon.filter(m=>coVT.indexOf(m)<0);
+  const ghiChu=thieu.length?`<div class="phutoggle"><span class="pt-note">Kỳ đang chọn có ${esc(monthsLabel(thieu))} chưa có Target Vượt Trội —
+      tab này chỉ cộng <b>${esc(monthsLabel(thangVT))}</b> (cả target lẫn thực đạt).</span></div>`:"";
 
-  /* ---- chọn kỳ ngay trong tab (đổi bộ lọc tháng chung của trang) ---- */
-  const chip=(id,txt,arr)=>{ const on=arr.length===ms.length&&arr.every((m,i)=>m===ms[i])&&!(tuChon&&arr.length===1);
-    const co=arr.some(m=>vtdCoSo(nam,m));
-    return `<button type="button" class="vtdk${on?" on":""}${co?"":" nod"}" data-vtdky="${arr.join(",")}"
-      title="${esc(txt)}${co?"":" — chưa có số thực đạt"}">${esc(txt)}</button>`; };
-  const chips=coVT.map(m=>chip("t"+m,"T"+m,[m])).join("")
-    + (coVT.length>1?chip("q",`Cộng dồn ${monthsLabel(coVT)}`,coVT):"");
+  const units=[...(showKho(S)?unitsKho(S).map(c=>[c,"kho"]):[]),...(showNha(S)?unitsNha(S).map(c=>[c,"nha"]):[])];
+  const grp4=k=>`<td class="sep">${valCell(k,"target")}</td><td>${valCell(k,"actual")}</td>
+    <td>${rateCell(k)}</td><td>${badge(k)}</td>`;
+  const nhomCell=loai=>`<td class="l">${loai==="kho"?"Tại Kho":"Tại Nhà"}</td>`;
+  const tenCell=c=>`<td class="l stick">${esc(vungOf(c).replace("Vùng ","V. "))}</td>
+    <td class="l stick2"><b>${esc(tinhOf(c))}</b> <span style="color:var(--muted);font-size:10px">${esc(c)}</span></td>`;
+  const totCells=`<td class="l stick">${esc(S.vung==="TONG"?"2 vùng":S.vung)}</td><td class="l stick2">TỔNG:</td><td class="l">–</td>`;
+  const hd4=`<th class="sep">KPI VƯỢT TRỘI</th><th>THỰC ĐẠT</th><th>TỶ LỆ</th><th>ĐÁNH GIÁ</th>`;
+  const thDV=`<th class="l stick" rowspan="2" style="vertical-align:bottom">VÙNG</th>
+        <th class="l stick2" rowspan="2" style="vertical-align:bottom">TỈNH</th>
+        <th class="l" rowspan="2" style="vertical-align:bottom">NHÓM</th>`;
 
-  const banner=bannerHTML("TARGET VƯỢT TRỘI — DOANH THU","trophy",[
-    bItem("Thực đạt (4 nhóm)","banknote",tg.A==null?"–":tr(tg.A),"",
-      quy?`${ms.length} tháng cộng dồn`:(tg.dk!=null?`dự kiến cả tháng <b style="color:#FFD500">${tr(tg.dk)}</b>`:"cả tháng"),true),
-    bItem("Target vượt trội","trophy",tr(tg.VF),"",`% đạt <b style="color:#FFD500">${vtdPc(tg.rV)}</b>`),
-    bItem("Target base","target",tr(tg.BF),"",`% đạt <b style="color:#FFD500">${vtdPc(tg.rB)}</b>`),
-    bItem("Còn thiếu tới VT","flame",tg.thieu==null?"–":tg.thieu<=0?"đã chạm":tr(tg.thieu),"",quy?`so tổng VT ${ms.length} tháng`:"so VT cả tháng"),
-    bItem("Đơn vị đạt VT","medal",(()=>{ const us=vtdUnits(VTD_TONG,SS); const n=us.filter(([c,l])=>{const x=vtdCell(c,l,VTD_TONG,ms,SS);return x&&x.muc==="vt"}).length;
-      return `${n}<span class="u">/${us.length}</span>`; })(),"","tổng 4 nhóm")
-  ]);
+  /* --- 1/ BÊN TRONG --- */
+  const rowsIn=units.map(([c,loai])=>({c,loai,k:calcVtdUnitCat(c,loai,loai==="kho"?"Bảo hành tại kho":"Bảo hành tại nhà",S)}));
+  const secIn=`<div class="card"><header><span class="ci">${ic("layers",16)}</span>
+      <div><h3>1/ BÊN TRONG</h3><span class="sub">Doanh thu đơn hàng bên trong (BH tại nhà + BH tại kho) so với TARGET VƯỢT TRỘI · ${esc(kyLabel(S))}</span></div>
+      <div class="hr">${infoI("Thực đạt lấy y hệt tab 5 DOANH THU. Cột KPI là <b>Target Vượt Trội</b> (khối C sheet TARGET). Với nhóm Bên trong, target vượt trội = target base. Gói bán 2025 không có target vượt trội nên không có ở tab này.")}</div></header>
+    <div class="body tight"><div class="tblwrap"><table class="dt">
+      <thead><tr>${thDV}<th class="g" colspan="4">${ic("layers",12)} BÊN TRONG</th></tr><tr>${hd4}</tr></thead>
+      <tbody><tr class="tot">${totCells}${grp4(bt)}</tr>
+        ${rowsIn.map(r=>`<tr>${tenCell(r.c)}${nhomCell(r.loai)}${grp4(r.k)}</tr>`).join("")}
+      </tbody></table></div></div></div>`;
 
-  const kyBar=`<div class="vtdbar"><div class="vtdbar-l">${ic("calendar",14)}<b>Kỳ đo:</b> ${esc(lblKy)}
-      ${tuChon?`<span class="vtdnote">Bộ lọc tháng chung đang ở ${esc(kyLabel(S))} — Target Vượt Trội chỉ có ${esc(monthsLabel(coVT))}/${nam} nên đang hiện tháng gần nhất có số.</span>`:""}</div>
-    <div class="vtdbar-r">${chips}</div></div>`;
-
-  /* ---- 5 thẻ: tổng + 4 nhóm; bấm để chọn nhóm cho bảng chi tiết ---- */
-  const cards=`<div class="vtdcards">${T.map(({n,x})=>{
-    const w=x.rV==null?0:clamp(x.rV*100,2,100);
-    return `<button type="button" class="vtdcard m-${x.muc}${VTD_SEL===n.k?" sel":""}" data-vtdnhom="${n.k}" ${vtdTip(x,n,lblKy)}>
-      <span class="vh">${ic(n.icon,15)}<b>${esc(n.ten)}</b></span>
-      <span class="vs">${esc(n.sub)}</span>
-      <span class="vv">${vtdPc(x.rV)}<small> so VT</small></span>
-      <span class="vm"><i style="width:${w}%"></i></span>
-      <span class="vf">${vtdBadge(x)}<span>base ${vtdPc(x.rB)}</span></span>
-      <span class="vn">Thực đạt <b>${x.A==null?"–":tr(x.A)}</b> · VT <b>${tr(x.VF)}</b></span></button>`; }).join("")}</div>`;
-
-  /* ---- bảng chi tiết nhóm đang chọn ---- */
-  const nSel=nhoms.find(n=>n.k===VTD_SEL);
-  const us=vtdUnits(nSel,SS);
-  const rows=us.map(([c,l])=>({c,l,x:vtdCell(c,l,nSel,ms,SS)})).filter(r=>r.x);
-  const tSel=T.find(t=>t.n.k===VTD_SEL).x;
-  const td=(x)=>`<td class="num">${x.A==null?DASH:tr(x.A)}${x.dk!=null?`<i class="vtddk">dự kiến ${tr(x.dk)}</i>`:""}</td>
-      <td>${tr(x.BF)}</td><td class="vtdvt">${tr(x.VF)}</td>
-      <td class="r-${x.rB==null?"none":x.rB>=1?"ok":"no"}">${vtdPc(x.rB)}</td>
-      <td class="r-${x.muc}"><b>${vtdPc(x.rV)}</b>${quy&&x.pV!=null?`<i class="vtddk">hoàn thành ${vtdPc(x.pV)} VT cả kỳ</i>`:(x.dk!=null&&x.pV!=null?`<i class="vtddk">đến hiện tại ${vtdPc(x.pV)} VT</i>`:"")}</td>
-      <td>${x.thieu==null?DASH:x.thieu<=0?`<span class="vtdok">đã chạm</span>`:tr(x.thieu)}</td>
-      <td>${vtdBadge(x)}</td>`;
-  const bang=`<div class="card"><header><span class="ci">${ic(nSel.icon,16)}</span>
-      <div><h3>${esc(nSel.ten)} — chi tiết theo tỉnh / kho</h3><span class="sub">${esc(lblKy)} · ${esc(scopeLbl(S))} · bấm thẻ phía trên để đổi nhóm</span></div>
-      <div class="hr">${infoI(`<b>% so base / % so VT</b> = thực đạt ÷ target <b>tới hiện tại</b>.
-        Tháng đã chốt tính đủ tháng; tháng đang chạy nhân target với số ngày đã qua (với 1 tháng thì đúng bằng
-        <b>dự kiến cả tháng ÷ target</b> như các tab khác); tháng chưa có số không tính.
-        <b>Còn thiếu tới VT</b> = target vượt trội cả kỳ − thực đạt đã có.`)}</div></header>
-    <div class="body tight"><div class="tblwrap"><table class="dt vtdtbl">
-      <thead><tr><th class="l stick">VÙNG</th><th class="l stick2">TỈNH / KHO</th>
-        <th>THỰC ĐẠT</th><th>TARGET BASE</th><th class="vtdvt">TARGET VƯỢT TRỘI</th>
-        <th>% SO BASE</th><th>% SO VƯỢT TRỘI</th><th>CÒN THIẾU TỚI VT</th><th>ĐÁNH GIÁ</th></tr></thead>
-      <tbody><tr class="tot"><td class="l stick">${esc(S.vung==="TONG"?"2 vùng":S.vung)}</td><td class="l stick2">TỔNG:</td>${td(tSel)}</tr>
-        ${rows.map(r=>`<tr ${vtdTip(r.x,nSel,(r.l==="kho"?tinhOf(r.c)+" (kho)":tinhOf(r.c)))}>
-          <td class="l stick">${esc(vungOf(r.c).replace("Vùng ","V. "))}</td>
-          <td class="l stick2"><b>${esc(tinhOf(r.c))}</b>${r.l==="kho"?` <span class="vtag kho">kho</span>`:""}</td>${td(r.x)}</tr>`).join("")}
+  /* --- 2/ BÊN NGOÀI --- */
+  const rowsOut=units.map(([c,loai])=>{
+    const d11=calcVtdUnitCat(c,loai,"BH 1 đổi 1",S), bhmr=calcVtdUnitCat(c,loai,"BHMR",S), sc=calcVtdUnitCat(c,loai,"SCDV",S);
+    return {c,loai,d11,bhmr,sc,tong:sumKpi([d11,bhmr,sc],"BÊN NGOÀI","trendup")}; });
+  const secOut=`<div class="card"><header><span class="ci">${ic("trendup",16)}</span>
+      <div><h3>2/ BÊN NGOÀI</h3><span class="sub">BÊN NGOÀI = 1 ĐỔI 1 + BẢO HÀNH MỞ RỘNG + SỬA CHỮA KHÁCH LẺ — so với TARGET VƯỢT TRỘI</span></div>
+      <div class="hr">${infoI("Chỉ gồm 3 nhóm có Target Vượt Trội. 5 dịch vụ mới (Bảo hành ủy quyền, Sửa chữa BHX/ĐMX, Gói PRO, Thu cũ đổi mới, Solar) không có target vượt trội nên không có ở tab này — TỔNG BÊN NGOÀI ở đây vì vậy có thể khác tab 5.")}</div></header>
+    <div class="body tight"><div class="tblwrap"><table class="dt">
+      <thead><tr>${thDV}
+        <th class="g" colspan="4">${ic("trendup",12)} BÊN NGOÀI</th>
+        <th class="g" colspan="4">${ic("refresh",12)} 1 ĐỔI 1</th>
+        <th class="g" colspan="4">${ic("shield",12)} BẢO HÀNH MỞ RỘNG</th>
+        <th class="g" colspan="4">${ic("wrench",12)} SỬA CHỮA KHÁCH LẺ</th></tr>
+      <tr>${hd4.repeat(4)}</tr></thead>
+      <tbody><tr class="tot">${totCells}${grp4(bn)}${grp4(calcVtdCat("BH 1 đổi 1",S))}${grp4(calcVtdCat("BHMR",S))}${grp4(calcVtdCat("SCDV",S))}</tr>
+        ${rowsOut.map(r=>`<tr>${tenCell(r.c)}${nhomCell(r.loai)}${grp4(r.tong)}${grp4(r.d11)}${grp4(r.bhmr)}${grp4(r.sc)}</tr>`).join("")}
       </tbody></table></div>
-      <div class="cap">Kho bảo hành tại kho chỉ có nhóm <b>Bên trong</b> và <b>Khách lẻ</b> (không có 1 Đổi 1 / BHMR).
-        Target vượt trội nhóm <b>Bên trong</b> bằng đúng target base (theo sheet TARGET) nên đạt base là đạt vượt trội.</div>
+      <div class="cap">Với 2 kho bảo hành tại kho, 1 đổi 1 và BHMR không áp dụng nên hiển thị “–”.</div>
     </div></div>`;
 
-  /* ---- ma trận % so VT: đơn vị × nhóm ---- */
-  const usAll=vtdUnits(VTD_TONG,SS);
-  const mt=`<div class="card"><header><span class="ci">${ic("grid",16)}</span>
-      <div><h3>Toàn cảnh % đạt Target Vượt Trội</h3><span class="sub">${esc(lblKy)} · mỗi ô = % so VT · màu theo 3 mức đánh giá</span></div></header>
-    <div class="body tight"><div class="tblwrap"><table class="dt vtdmx">
-      <thead><tr><th class="l stick">VÙNG</th><th class="l stick2">TỈNH / KHO</th>${nhoms.map(n=>`<th>${esc(n.ten)}</th>`).join("")}</tr></thead>
-      <tbody><tr class="tot"><td class="l stick">${esc(S.vung==="TONG"?"2 vùng":S.vung)}</td><td class="l stick2">TỔNG:</td>
-        ${T.map(({n,x})=>`<td class="r-${x.muc}" ${vtdTip(x,n,"tổng")}><b>${vtdPc(x.rV)}</b></td>`).join("")}</tr>
-      ${usAll.map(([c,l])=>`<tr><td class="l stick">${esc(vungOf(c).replace("Vùng ","V. "))}</td>
-        <td class="l stick2"><b>${esc(tinhOf(c))}</b>${l==="kho"?` <span class="vtag kho">kho</span>`:""}</td>
-        ${nhoms.map(n=>{ const x=vtdCell(c,l,n,ms,SS); if(!x) return `<td class="vtdna">–</td>`;
-          return `<td class="r-${x.muc}" ${vtdTip(x,n,l==="kho"?tinhOf(c)+" (kho)":tinhOf(c))}><b>${vtdPc(x.rV)}</b></td>`; }).join("")}</tr>`).join("")}
-      </tbody></table></div>
-      <div class="vtdleg"><span class="vtdb vt">${ic("trophy",10)}ĐẠT VƯỢT TRỘI</span> ≥ 100% target vượt trội
-        <span class="vtdb bs">${ic("check",10)}ĐẠT BASE</span> ≥ 100% base nhưng chưa tới VT
-        <span class="vtdb no">${ic("x",10)}CHƯA ĐẠT BASE</span> &lt; 100% base</div>
-    </div></div>`;
+  /* --- CHI TIẾT THEO NHÓM --- */
+  const rowNhom=(k,b)=>`<tr${b?' class="tot"':""}><td class="l">${b?`<b>${esc(k.name)}</b>`:esc(k.name)}</td>
+      <td>${valCell(k,"target")}</td><td>${valCell(k,"actual")}</td><td>${rateCell(k)}</td><td>${badge(k)}</td></tr>`;
+  const secNhom=`<div class="card"><header><span class="ci">${ic("medal",16)}</span>
+      <div><h3>Chi tiết theo nhóm</h3><span class="sub">5 dòng doanh thu có Target Vượt Trội · ${esc(scopeLbl(S))} · ${esc(kyLabel(S))}</span></div></header>
+    <div class="body tight"><div class="tblwrap"><table class="dt">
+      <thead><tr><th class="l">NHÓM</th><th>KPI VƯỢT TRỘI</th><th>THỰC ĐẠT</th><th>TỶ LỆ</th><th>ĐÁNH GIÁ</th></tr></thead>
+      <tbody>${["Bảo hành tại nhà","Bảo hành tại kho"].map(c=>rowNhom(calcVtdCat(c,S))).join("")}
+        ${rowNhom(bt,true)}
+        ${VTD_NGOAI.map(c=>rowNhom(calcVtdCat(c,S))).join("")}
+        ${rowNhom(bn,true)}${rowNhom(tg,true)}
+      </tbody></table></div></div></div>`;
 
-  return banner+kyBar+cards+bang+mt;
+  return gopBar(S) + banner + ghiChu + secIn + secOut + secNhom;
 }
-
-/* sự kiện: chọn kỳ / chọn nhóm */
-document.addEventListener("click",e=>{
-  if(ST.tab!==10) return;
-  const k=e.target.closest("[data-vtdky]");
-  if(k){ const ms=k.dataset.vtdky.split(",").map(Number); ST.ky="Tháng"; setMonths(ms); return; }
-  const n=e.target.closest("[data-vtdnhom]");
-  if(n){ VTD_SEL=n.dataset.vtdnhom; render(); }
-});
 </script>
 <script>
 /* =============================================================================
